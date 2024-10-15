@@ -5,6 +5,8 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
+#include <sstream>
+
 
 #include "src/logic.h"
 
@@ -111,12 +113,28 @@ private:
 public:
   class Builder;
 
+
+
+//Validar las letras
+
+
   void execute()
   {
     while (true)
     {
       _showOptions();
-      const int option = _getTerminalInput<int>();
+
+      std::string input;
+      std::getline(std::cin, input);
+
+      std::stringstream ss(input);
+      int option;
+      if (!(ss >> option) || !(ss.eof()))
+      {
+        _print(_dictionary.at("invalid_option"));
+        continue;
+      }
+
       if (option == static_cast<int>(_operations.size()) + 1)
       {
         _print(_dictionary.at("exit"));
@@ -133,6 +151,8 @@ public:
     }
   }
 
+
+
   void _showOptions() const
   {
     _print("\n===== ", _dictionary.at("title"), " =====\n");
@@ -144,6 +164,11 @@ public:
     _print(_dictionary.at("prompt"));
   }
 };
+
+
+
+
+
 
 
 
