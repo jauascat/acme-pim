@@ -1,1 +1,25 @@
-main
+# CMake y archivos generados automáticamente
+cmake-build-*
+CMakeLists.txt.user
+CMakeCache.txt
+*.cmake
+
+# Configuración de CLion
+.idea/
+
+# Configuración de VS Code
+.vscode/
+
+# Archivos de compilación y binarios
+*.o
+*.obj
+*.log
+*.out
+*.a
+*.exe
+*.so
+*.dylib
+
+# Archivos de depuración
+*.gch
+*.dSYM/

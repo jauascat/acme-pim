@@ -5,7 +5,9 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
-#include "src/logic.hpp"
+
+#include "src/logic.h"
+
 
 template <typename... Args>
 void _print(Args &&...args)
@@ -170,95 +172,164 @@ public:
   }
 };
 
-
-TerminalApp getCalculatorMenu()
+TerminalApp getSubmenuProductos()
 {
-  auto isPrimeOp = UnaryOperation<int>()
+  auto crearProducto = UnaryOperation<int>()
     .withDictionary({
-      {"prompt", "Enter a number to check if it's prime: "},
-      {"description", "Check if a number is prime"},
-      {"is", " is a prime number!\n"},
-      {"is_not", " is not a prime number.\n"},
-      {"error", "Invalid input for prime check.\n"}
+      {"prompt", "Ingrese el nombre del producto: "},
+      {"description", "Crear un producto"},
+      {"result", "Producto creado con exito!\n"},
+      {"error", "Error al crear el producto.\n"}
     })
-    .onInput([](int value, const auto &dict) {
-      bool isPrime = Logic::isPrime(value);
-      if (isPrime) {
-        _print(value, dict.at("is"));
-      } else {
-        _print(value, dict.at("is_not"));
-      }
+    .onInput([](int nombre, const auto &dict) {
+      // Productos::crearProducto(nombre);
+      _print(dict.at("result"));
     });
 
-  auto addNumbersOp = BinaryOperation<int, int>()
+    auto modificarProducto = UnaryOperation<int>()
     .withDictionary({
-      {"prompt", "Enter two numbers to add: "},
-      {"description", "Perform addition"},
-      {"result", "Result: "},
-      {"error", "Invalid input for addition.\n"}
+      {"prompt", "Ingrese el id del producto: "},
+      {"description", "Modificar un producto"},
+      {"result", "Producto modificado con exito!\n"},
+      {"error", "Error al modificar el producto.\n"}
     })
-    .onInput([](int a, int b, const auto &dict) {
-      int result = Logic::add(a, b);
-      _print(dict.at("result"), a, " + ", b, " = ", result, "\n");
-    });
-    
-  auto subtractNumbersOp = BinaryOperation<int, int>()
-    .withDictionary({
-      {"prompt", "Enter two numbers to subtract: "},
-      {"description", "Perform subtraction"},
-      {"result", "Result: "},
-      {"error", "Invalid input for subtraction.\n"}
-    })
-    .onInput([](int a, int b, const auto &dict) {
-      int result = Logic::subtract(a, b);
-      _print(dict.at("result"), a, " - ", b, " = ", result, "\n");
+    .onInput([](int id, const auto &dict) {
+      // Productos::modificarProducto(id, precio);
+      _print(dict.at("result"));
     });
 
-  auto multiplyNumbersOp = BinaryOperation<int, int>()
+    auto eliminarProducto = UnaryOperation<int>()
     .withDictionary({
-      {"prompt", "Enter two numbers to multiply: "},
-      {"description", "Perform multiplication"},
-      {"result", "Result: "},
-      {"error", "Invalid input for multiplication.\n"}
+      {"prompt", "Ingrese el id del producto: "},
+      {"description", "Eliminar un producto"},
+      {"result", "Producto eliminado con exito!\n"},
+      {"error", "Error al eliminar el producto.\n"}
     })
-    .onInput([](int a, int b, const auto &dict) {
-      int result = Logic::multiply(a, b);
-      _print(dict.at("result"), a, " * ", b, " = ", result, "\n");
+    .onInput([](int id, const auto &dict) {
+      // Productos::eliminarProducto(id);
+      _print(dict.at("result"));
     });
 
-  auto divideNumbersOp = BinaryOperation<int, int>()
+    auto listarProductos = UnaryOperation<int>()
     .withDictionary({
-      {"prompt", "Enter two numbers to divide: "},
-      {"description", "Perform division"},
-      {"result", "Result: "},
-      {"error", "Invalid input for division.\n"}
+      {"prompt", "Ingrese el id del producto: "},
+      {"description", "Listar todos los productos"},
+      {"result", "Productos:\n"},
+      {"error", "Error al listar los productos.\n"}
     })
-    .onInput([](int a, int b, const auto &dict) {
-      double result = Logic::divide(a, b);
-      _print(dict.at("result"), a, " / ", b, " = ", result, "\n");
+    .onInput([](int id, const auto &dict) {
+      // Productos::listarProductos();
+      _print(dict.at("result"));
     });
 
-  auto calculatorApp = TerminalApp::Builder()
+  auto menuProductos = TerminalApp::Builder()
     .withDictionary({
-      {"title", "Calculator!"},
-      {"prompt", "Choose an option: "},
-      {"exit", "Exiting...\n"},
-      {"invalid_option", "Invalid option, please try again.\n"}
+      {"title", "Proyecto!"},
+      {"description", "Submenu Productos"},
+      {"prompt", "Elija una opcion: "},
+      {"exit", "Saliendo...\n"},
+      {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<UnaryOperation<int>>(isPrimeOp)
-    .withOperation<BinaryOperation<int, int>>(addNumbersOp)
-    .withOperation<BinaryOperation<int, int>>(subtractNumbersOp)
-    .withOperation<BinaryOperation<int, int>>(multiplyNumbersOp)
-    .withOperation<BinaryOperation<int, int>>(divideNumbersOp)
+    .withOperation<UnaryOperation<int>>(crearProducto)
+    .withOperation<UnaryOperation<int>>(modificarProducto)
+    .withOperation<UnaryOperation<int>>(eliminarProducto)
+    .withOperation<UnaryOperation<int>>(listarProductos)
+    .build();
+
+  return menuProductos;
+}
+
+TerminalApp getSubmenuCategorias()
+{
+  auto crearCategoria = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el nombre de la categoria: "},
+      {"description", "Crear una categoria"},
+      {"result", "Categoria creada con exito!\n"},
+      {"error", "Error al crear la categoria.\n"}
+    })
+    .onInput([](int nombre, const auto &dict) {
+      // Categorias::crearCategoria(nombre);
+      _print(dict.at("result"));
+    });
+
+    auto modificarCategoria = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el id de la categoria: "},
+      {"description", "Modificar una categoria"},
+      {"result", "Categoria modificada con exito!\n"},
+      {"error", "Error al modificar la categoria.\n"}
+    })
+    .onInput([](int id, const auto &dict) {
+      // Categorias::modificarCategoria(id);
+      _print(dict.at("result"));
+    });
+
+    auto eliminarCategoria = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el id de la categoria: "},
+      {"description", "Eliminar una categoria"},
+      {"result", "Categoria eliminada con exito!\n"},
+      {"error", "Error al eliminar la categoria.\n"}
+    })
+    .onInput([](int id, const auto &dict) {
+      // Categorias::eliminarCategoria(id);
+      _print(dict.at("result"));
+    });
+
+    auto visualizarCategoria = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el id de la categoria: "},
+      {"description", "Visualizar una categoria"},
+      {"result", "Categoria visualizada con exito!\n"},
+      {"error", "Error al visualizar la categoria.\n"}
+    })
+    .onInput([](int id, const auto &dict) {
+      // Categorias::visualizarCategoria(id);
+      _print(dict.at("result"));
+    });
+
+    auto submenuCategorias = TerminalApp::Builder()
+    .withDictionary({
+      {"title", "Proyecto!"},
+      {"description", "Submenu Categorias"},
+      {"prompt", "Elija una opcion: "},
+      {"exit", "Saliendo...\n"},
+      {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
+    })
+    .withOperation<UnaryOperation<int>>(crearCategoria)
+    .withOperation<UnaryOperation<int>>(modificarCategoria)
+    .withOperation<UnaryOperation<int>>(eliminarCategoria)
+    .withOperation<UnaryOperation<int>>(visualizarCategoria)
+    .build();
+
+  return submenuCategorias;
+}
+
+
+
+TerminalApp GetAppInstance()
+{
+  auto app = TerminalApp::Builder()
+    .withDictionary({
+      {"title", "Proyecto!"},
+      {"prompt", "Elija una opcion: "},
+      {"exit", "Saliendo...\n"},
+      {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
+    })
+    .withOperation<TerminalApp>(getSubmenuProductos())
+    .withOperation<TerminalApp>(getSubmenuCategorias())
     .build();
 
 
-  return calculatorApp;
+  return app;
 }
 
 int main()
 {
-  auto calculator = getCalculatorMenu();
-  calculator.execute();
+  auto app = GetAppInstance();
+  app.execute();
   return 0;
 }
+
+

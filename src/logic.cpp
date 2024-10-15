@@ -1,4 +1,4 @@
-#include "logic.hpp"
+#include "logic.h"
 
 bool Logic::isPrime(int number) {
     if (number <= 1) return false;
