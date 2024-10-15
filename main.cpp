@@ -22,7 +22,6 @@ T _getTerminalInput()
   return value;
 }
 
-
 class TerminalOperation
 {
 public:
@@ -33,8 +32,6 @@ public:
     return _dictionary.at("description");
   }
 };
-
-
 
 template <typename Child, typename... InputTypes>
 class TerminalOp : public TerminalOperation
@@ -69,8 +66,6 @@ public:
   }
 };
 
-
-
 template <typename T>
 class UnaryOperation final : public TerminalOp<UnaryOperation<T>, T>
 {
@@ -83,9 +78,6 @@ public:
     });
   }
 };
-
-
-
 
 template <typename T, typename U>
 class BinaryOperation final : public TerminalOp<BinaryOperation<T, U>, T, U>
@@ -100,9 +92,6 @@ public:
     });   
   }
 };
-
-
-
 
 class TerminalApp : public TerminalOp<TerminalApp>
 {
@@ -145,8 +134,6 @@ public:
   }
 };
 
-
-
 class TerminalApp::Builder
 {
   TerminalApp _app;
@@ -171,6 +158,72 @@ public:
     return std::move(_app);
   }
 };
+
+TerminalApp getSubMenuVariantes(  ) {
+   auto crearVariante = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el nombre de la variante: "},
+      {"description", "Crear una variante"},
+      {"result", "Variante creada con exito!\n"},
+      {"error", "Error al crear la variante.\n"}
+    })
+    .onInput([](int nombre, const auto &dict) {
+      // Variantes::crearVariante(nombre);
+      _print(dict.at("result"));
+    });
+
+    auto modificarVariante = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el id de la variante: "},
+      {"description", "Modificar una variante"},
+      {"result", "Variante modificada con exito!\n"},
+      {"error", "Error al modificar la variante.\n"}
+    })
+    .onInput([](int id, const auto &dict) {
+      // Variantes::modificarVariante(id);
+      _print(dict.at("result"));
+    });
+
+    auto eliminarVariante = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el id de la variante: "},
+      {"description", "Eliminar una variante"},
+      {"result", "Variante eliminada con exito!\n"},
+      {"error", "Error al eliminar la variante.\n"}
+    })
+    .onInput([](int id, const auto &dict) {
+      // Variantes::eliminarVariante(id);
+      _print(dict.at("result"));
+    });
+
+    auto visualizarVariante = UnaryOperation<int>()
+    .withDictionary({
+      {"prompt", "Ingrese el id de la variante: "},
+      {"description", "Visualizar una variante"},
+      {"result", "Variante visualizada con exito!\n"},
+      {"error", "Error al visualizar la variante.\n"}
+    })
+    .onInput([](int id, const auto &dict) {
+      // Variantes::visualizarVariantes(id);
+      _print(dict.at("result"));
+    });
+
+    auto submenuVariantes = TerminalApp::Builder()
+    .withDictionary({
+      {"title", "Proyecto!"},
+      {"description", "Submenu Variantes"},
+      {"prompt", "Elija una opcion: "},
+      {"exit", "Saliendo...\n"},
+      {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
+    })
+    .withOperation<UnaryOperation<int>>(crearVariante)
+    .withOperation<UnaryOperation<int>>(modificarVariante)
+    .withOperation<UnaryOperation<int>>(eliminarVariante)
+    .withOperation<UnaryOperation<int>>(visualizarVariante)
+    .build();
+
+  return submenuVariantes;
+}
 
 TerminalApp getSubmenuProductos()
 {
@@ -222,6 +275,20 @@ TerminalApp getSubmenuProductos()
       _print(dict.at("result"));
     });
 
+  auto verVariantes = UnaryOperation<int>()
+      .withDictionary({
+          {"prompt", "Entrando al submenu de variantes...\n"},
+          {"description", "Ver Variantes"},
+          {"result", "Submenu de variantes activado.\n"},
+          {"error", "Error al entrar al submenu de variantes.\n"}
+      })
+      .onInput([](int, const auto &dict) {
+          _print(dict.at("prompt"));
+          auto variantesMenu = getSubMenuVariantes();
+          variantesMenu.execute();
+          _print(dict.at("result"));
+      });
+
   auto menuProductos = TerminalApp::Builder()
     .withDictionary({
       {"title", "Proyecto!"},
@@ -234,6 +301,7 @@ TerminalApp getSubmenuProductos()
     .withOperation<UnaryOperation<int>>(modificarProducto)
     .withOperation<UnaryOperation<int>>(eliminarProducto)
     .withOperation<UnaryOperation<int>>(listarProductos)
+    .withOperation<UnaryOperation<int>>(verVariantes)
     .build();
 
   return menuProductos;
@@ -306,8 +374,6 @@ TerminalApp getSubmenuCategorias()
   return submenuCategorias;
 }
 
-
-
 TerminalApp GetAppInstance()
 {
   auto app = TerminalApp::Builder()
@@ -321,7 +387,6 @@ TerminalApp GetAppInstance()
     .withOperation<TerminalApp>(getSubmenuCategorias())
     .build();
 
-
   return app;
 }
 
@@ -331,5 +396,3 @@ int main()
   app.execute();
   return 0;
 }
-
-
