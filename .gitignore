@@ -23,3 +23,9 @@ CMakeCache.txt
 # Archivos de depuración
 *.gch
 *.dSYM/
+
+# build folder
+build/
+
+# scrap folder
+scrap/
