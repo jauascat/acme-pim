@@ -1,4 +1,6 @@
 #include "terminal_implementations.h"
+#include <limits>
+#include <thread>
 
 TerminalApp GetAppInstance()
 {
@@ -14,20 +16,19 @@ TerminalApp GetAppInstance()
     .withOperation<TerminalApp>(getSubmenuBusqueda())
     .build();
 
-
   return app;
 }
 
 TerminalApp getSubmenuProductos()
 {
-  auto crearProducto = UnaryOperation<int>()
+  auto crearProducto = UnaryOperation<std::string>()
     .withDictionary({
       {"prompt", "Ingrese el nombre del producto: "},
       {"description", "Crear un producto"},
       {"result", "Producto creado con exito!\n"},
       {"error", "Error al crear el producto.\n"}
     })
-    .onInput([](int nombre, const auto &dict) {
+    .onInput([](std::string nombre, const auto &dict) {
       // Productos::crearProducto(nombre);
       _print(dict.at("result"));
     });
@@ -68,6 +69,58 @@ TerminalApp getSubmenuProductos()
       _print(dict.at("result"));
     });
 
+  // Operación para administrar variantes (crear, eliminar, editar, visualizar)
+  auto administrarVariantes = UnaryOperation<int>()
+      .withDictionary({
+        {"prompt", "Ingrese el ID del producto para administrar sus variantes: "},
+        {"description", "Administrar variantes de un producto"},
+        {"result", "Mantenimiento de variantes:\n 1. Crear\n 2. Editar\n 3. Eliminar\n 4. Visualizar\n"},
+        {"error", "Error al administrar variantes.\n"}
+      })
+      .onInput([](int productoID, const auto &dict) {
+        // Placeholder para futuras funciones de variantes
+        _print(dict.at("result"));
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        std::string input;
+        std::getline(std::cin, input);
+        int option;
+        std::stringstream ss(input);
+        ss >> option;
+
+
+        switch (option) {
+            case 1: { // Crear
+                _print("Ingrese el nombre de la nueva variante: ");
+                std::string nombreVariante;
+                std::getline(std::cin, nombreVariante);
+                // Lógica para crear variante
+                _print("Variante \"" + nombreVariante + "\" creada correctamente.\n");
+                break;
+            }
+            case 2: { // Editar
+                _print("Ingrese el nuevo nombre de la variante: ");
+                std::string nuevoNombreVariante;
+                std::getline(std::cin, nuevoNombreVariante);
+                // Lógica para editar variante
+                _print("Variante actualizada a \"" + nuevoNombreVariante + "\" correctamente.\n");
+                break;
+            }
+            case 3: { // Eliminar
+                // Lógica para eliminar variante
+                _print("Variante eliminada correctamente.\n");
+                break;
+            }
+            case 4: {
+                _print("Visualizando variantes...\n");
+                break;
+            }
+            default:
+              _print("Opcion invalida. Intente de nuevo.\n");
+              break;
+        }
+      });
+
   auto menuProductos = TerminalApp::Builder()
     .withDictionary({
       {"title", "Proyecto!"},
@@ -76,10 +129,11 @@ TerminalApp getSubmenuProductos()
       {"exit", "Saliendo...\n"},
       {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<UnaryOperation<int>>(crearProducto)
+    .withOperation<UnaryOperation<std::string>>(crearProducto)
     .withOperation<UnaryOperation<int>>(modificarProducto)
     .withOperation<UnaryOperation<int>>(eliminarProducto)
     .withOperation<UnaryOperation<int>>(listarProductos)
+    .withOperation<UnaryOperation<int>>(administrarVariantes)
     .build();
 
   return menuProductos;
@@ -87,14 +141,14 @@ TerminalApp getSubmenuProductos()
 
 TerminalApp getSubmenuCategorias()
 {
-  auto crearCategoria = UnaryOperation<int>()
+  auto crearCategoria = UnaryOperation<std::string>()
     .withDictionary({
       {"prompt", "Ingrese el nombre de la categoria: "},
       {"description", "Crear una categoria"},
       {"result", "Categoria creada con exito!\n"},
       {"error", "Error al crear la categoria.\n"}
     })
-    .onInput([](int nombre, const auto &dict) {
+    .onInput([](std::string nombre, const auto &dict) {
       // Categorias::crearCategoria(nombre);
       _print(dict.at("result"));
     });
@@ -143,7 +197,7 @@ TerminalApp getSubmenuCategorias()
       {"exit", "Saliendo...\n"},
       {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<UnaryOperation<int>>(crearCategoria)
+    .withOperation<UnaryOperation<std::string>>(crearCategoria)
     .withOperation<UnaryOperation<int>>(modificarCategoria)
     .withOperation<UnaryOperation<int>>(eliminarCategoria)
     .withOperation<UnaryOperation<int>>(visualizarCategoria)
@@ -154,14 +208,14 @@ TerminalApp getSubmenuCategorias()
 
 TerminalApp getSubmenuBusqueda()
 {
-  auto buscarNombre = UnaryOperation<int>()
+  auto buscarNombre = UnaryOperation<std::string>()
     .withDictionary({
       {"prompt", "Buscar por Nombre: "},
       {"description", "Busqueda por nombre"},
       {"result", "Buscando nombre...\n"},
       {"error", "Error al buscar.\n"}
     })
-    .onInput([](int nombre, const auto &dict) {
+    .onInput([](std::string nombre, const auto &dict) {
       _print(dict.at("result"));
     });
 
@@ -206,7 +260,7 @@ TerminalApp getSubmenuBusqueda()
       {"exit", "Saliendo...\n"},
       {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<UnaryOperation<int>>(buscarNombre)
+    .withOperation<UnaryOperation<std::string>>(buscarNombre)
     .withOperation<UnaryOperation<int>>(buscarCategoria)
     .withOperation<UnaryOperation<int>>(buscarAtributos)
     .withOperation<UnaryOperation<int>>(buscarRangoPrecios)

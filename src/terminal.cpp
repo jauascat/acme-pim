@@ -1,4 +1,5 @@
 #include "terminal.h"
+#include <limits>
 
 void TerminalApp::execute() {
     while (true) {
@@ -21,6 +22,7 @@ void TerminalApp::execute() {
 
         if (option > 0 && static_cast<int>(option) <= _operations.size()) {
             _operations[option - 1]->execute();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         } else {
             _print(_dictionary.at("invalid_option"));
         }
