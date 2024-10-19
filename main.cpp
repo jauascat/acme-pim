@@ -1,4 +1,4 @@
-#include "src/terminal_implementations.h"
+#include "./src/View/terminal_implementations.h"
 
 int main()
 {
