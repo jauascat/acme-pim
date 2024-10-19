@@ -3,7 +3,8 @@
 #include <sqlite3.h>
 #include <string>
 #include <iostream>
-#include "data_classes.h"
+#include "../models/product.h"
+#include "../models/category.h"
 
 class DBOperator {
 private:

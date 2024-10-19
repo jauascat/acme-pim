@@ -21,53 +21,41 @@ TerminalApp GetAppInstance()
 
 TerminalApp getSubmenuProductos()
 {
-  auto crearProducto = UnaryOperation<std::string>()
-    .withDictionary({
-      {"prompt", "Ingrese el nombre del producto: "},
-      {"description", "Crear un producto"},
-      {"result", "Producto creado con exito!\n"},
-      {"error", "Error al crear el producto.\n"}
-    })
-    .onInput([](std::string nombre, const auto &dict) {
-      // Productos::crearProducto(nombre);
-      _print(dict.at("result"));
-    });
+  auto modificarProducto = UnaryOperation<int>()
+  .withDictionary({
+    {"prompt", "Ingrese el id del producto: "},
+    {"description", "Modificar un producto"},
+    {"result", "Producto modificado con exito!\n"},
+    {"error", "Error al modificar el producto.\n"}
+  })
+  .onInput([](int id, const auto &dict) {
+    // Productos::modificarProducto(id, precio);
+    _print(dict.at("result"));
+  });
 
-    auto modificarProducto = UnaryOperation<int>()
-    .withDictionary({
-      {"prompt", "Ingrese el id del producto: "},
-      {"description", "Modificar un producto"},
-      {"result", "Producto modificado con exito!\n"},
-      {"error", "Error al modificar el producto.\n"}
-    })
-    .onInput([](int id, const auto &dict) {
-      // Productos::modificarProducto(id, precio);
-      _print(dict.at("result"));
-    });
+  auto eliminarProducto = UnaryOperation<int>()
+  .withDictionary({
+    {"prompt", "Ingrese el id del producto: "},
+    {"description", "Eliminar un producto"},
+    {"result", "Producto eliminado con exito!\n"},
+    {"error", "Error al eliminar el producto.\n"}
+  })
+  .onInput([](int id, const auto &dict) {
+    // Productos::eliminarProducto(id);
+    _print(dict.at("result"));
+  });
 
-    auto eliminarProducto = UnaryOperation<int>()
-    .withDictionary({
-      {"prompt", "Ingrese el id del producto: "},
-      {"description", "Eliminar un producto"},
-      {"result", "Producto eliminado con exito!\n"},
-      {"error", "Error al eliminar el producto.\n"}
-    })
-    .onInput([](int id, const auto &dict) {
-      // Productos::eliminarProducto(id);
-      _print(dict.at("result"));
-    });
-
-    auto listarProductos = UnaryOperation<int>()
-    .withDictionary({
-      {"prompt", "Ingrese el id del producto: "},
-      {"description", "Listar todos los productos"},
-      {"result", "Productos:\n"},
-      {"error", "Error al listar los productos.\n"}
-    })
-    .onInput([](int id, const auto &dict) {
-      // Productos::listarProductos();
-      _print(dict.at("result"));
-    });
+  auto listarProductos = UnaryOperation<int>()
+  .withDictionary({
+    {"prompt", "Ingrese el id del producto: "},
+    {"description", "Listar todos los productos"},
+    {"result", "Productos:\n"},
+    {"error", "Error al listar los productos.\n"}
+  })
+  .onInput([](int id, const auto &dict) {
+    // Productos::listarProductos();
+    _print(dict.at("result"));
+  });
 
   // Operación para administrar variantes (crear, eliminar, editar, visualizar)
   auto administrarVariantes = UnaryOperation<int>()
@@ -121,6 +109,12 @@ TerminalApp getSubmenuProductos()
         }
       });
 
+  auto addProduct = TeOpProductAdd()
+    .withDictionary({
+      {"description", "Crear un producto"}
+      // {"result", "Producto creado con exito!\n"},
+      // {"error", "Error al crear el producto.\n"}
+    });
   auto menuProductos = TerminalApp::Builder()
     .withDictionary({
       {"title", "Proyecto!"},
@@ -129,7 +123,7 @@ TerminalApp getSubmenuProductos()
       {"exit", "Saliendo...\n"},
       {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<UnaryOperation<std::string>>(crearProducto)
+    .withOperation<TeOpProductAdd>(addProduct)
     .withOperation<UnaryOperation<int>>(modificarProducto)
     .withOperation<UnaryOperation<int>>(eliminarProducto)
     .withOperation<UnaryOperation<int>>(listarProductos)

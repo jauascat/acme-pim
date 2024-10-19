@@ -3,8 +3,8 @@
 
 int main()
 {
-  // auto app = GetAppInstance();
-  // app.execute();
-  buildDB();
+  auto app = GetAppInstance();
+  app.execute();
+  // buildDB();
   return 0;
 }

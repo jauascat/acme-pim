@@ -8,6 +8,9 @@
 #include <functional>
 #include <sstream>
 #include "io.h"
+#include "../models/category.h"
+#include "../models/product.h"
+#include "../db/db.h"
 
 class TerminalOperation {
 public:
@@ -16,6 +19,15 @@ public:
     virtual void execute() = 0;
     std::string getDescription() const {
         return _dictionary.at("description");
+    }
+};
+
+template <typename Child>
+class TerminalOperation2 : public TerminalOperation {
+public:
+    Child& withDictionary(const std::unordered_map<std::string, std::string> &newDictionary) {
+        _dictionary = newDictionary;
+        return static_cast<Child&>(*this);
     }
 };
 
@@ -43,6 +55,48 @@ public:
         } catch (const std::exception& e) {
             _print("Error at ", this->_dictionary.at("error"), ": ", e.what(), "\n");
         }
+    }
+};
+
+class TeOpProductAdd final : public TerminalOperation2<TeOpProductAdd> {
+public:
+    void execute() override {
+        std::string name = _getTerminalInput2<std::string>(
+            "Ingrese el nombre del producto: ",
+            [](const std::string &value) {
+                bool isValid = !value.empty();
+                if (!isValid) {
+                    return std::make_pair(isValid, "El nombre del producto no puede estar vacio.");
+                }
+                return std::make_pair(isValid, "");
+            }
+        );
+        std::string description = _getTerminalInput2<std::string>(
+            "Ingrese la descripcion del producto: ",
+            [](const std::string &value) {
+                bool isValid = !value.empty();
+                if (!isValid) {
+                    return std::make_pair(isValid, "La descripcion del producto no puede estar vacia.");
+                }
+                return std::make_pair(isValid, "");
+            }
+        );
+        double price = _getTerminalInput2<double>(
+            "Ingrese el precio del producto: ",
+            [](const double &value) {
+                bool isValid = value <= 0;
+                if (!isValid) {
+                    return std::make_pair(isValid, "El precio del producto debe ser mayor a cero.");
+                }
+                return std::make_pair(isValid, "");
+            }
+        );
+        // Product product = Product(0, name, description, price);
+        //log product
+        _print("Producto añadido con exito!\n");
+        // _print("Nombre: ", product.name, "\n");
+        // _print("Descripcion: ", product.description, "\n");
+        // _print("Precio: ", product.price, "\n");
     }
 };
 
