@@ -3,8 +3,14 @@ project(acme_pim)
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(SQLite3 REQUIRED)
+
 add_executable(acme_pim
     main.cpp
-        src/terminal.cpp
-    src/terminal_implementations.cpp
+    src/io/terminal.cpp
+    src/io/terminal_implementations.cpp
+    src/db/db_operator.cpp
+    src/db/db_setup.cpp
 )
+
+target_link_libraries(acme_pim SQLite::SQLite3)
