@@ -8,6 +8,7 @@
 #include <functional>
 #include <sstream>
 #include "./Utils/io.h"
+#include "../Lab/LabLogic/Queue.h"
 
 class TerminalOperation {
 public:
@@ -75,9 +76,10 @@ private:
 
 public:
     class Builder;
-
+    Queue queue;  // Instancia de la cola de turnos
     void execute();
     void _showOptions() const;
+    void destruirCola();
 };
 
 
