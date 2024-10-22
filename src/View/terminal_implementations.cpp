@@ -13,10 +13,10 @@ TerminalApp GetAppInstance()
       {"exit", "Saliendo...\n"},
       {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<TerminalApp>(getSubmenuProductos())
-    .withOperation<TerminalApp>(getSubmenuCategorias())
-    .withOperation<TerminalApp>(getSubmenuBusqueda())
-    .withOperation<TerminalApp>(getSubmenuVariantes())
+    //.withOperation<TerminalApp>(getSubmenuProductos())
+    //.withOperation<TerminalApp>(getSubmenuCategorias())
+    //.withOperation<TerminalApp>(getSubmenuBusqueda())
+    //.withOperation<TerminalApp>(getSubmenuVariantes())
     .build();
 
   return app;
