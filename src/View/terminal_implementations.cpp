@@ -3,6 +3,7 @@
 #include "SubMenus/Products/Productos.h"
 #include "SubMenus/Search/Busqueda.h"
 #include "SubMenus/Variants/Variantes.h"
+#include "../Lab/LabMenu.h"
 
 TerminalApp GetAppInstance()
 {
@@ -17,6 +18,7 @@ TerminalApp GetAppInstance()
     //.withOperation<TerminalApp>(getSubmenuCategorias())
     //.withOperation<TerminalApp>(getSubmenuBusqueda())
     //.withOperation<TerminalApp>(getSubmenuVariantes())
+    .withOperation<TerminalApp>(getMenuGestionTurnos())
     .build();
 
   return app;
