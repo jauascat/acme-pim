@@ -2,12 +2,12 @@
 
 #include <string>
 
-class Product {
+class NewProduct {
 public:
     int id;
     std::string name;
     std::string description;
     double price;
 
-    Product(int id, const std::string& name, const std::string& description, double price);
+    NewProduct(int id, const std::string& name, const std::string& description, double price);
 };

@@ -16,8 +16,8 @@ public:
     DBOperator(const std::string& dbName);
     ~DBOperator();
 
-    bool addProduct(const Product& product);
-    bool updateProduct(const Product& product);
+    bool addProduct(const NewProduct& product);
+    bool updateProduct(const NewProduct& product);
     bool deleteProduct(int productId);
 
     bool addCategory(const Category& category);

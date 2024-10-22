@@ -26,14 +26,14 @@ bool DBOperator::executeSQL(const std::string& sql) {
   return true;
 }
 
-bool DBOperator::addProduct(const Product& product) {
+bool DBOperator::addProduct(const NewProduct& product) {
   std::string sql = "INSERT INTO Products (name, description, price) VALUES ('" +
     product.name + "', '" + product.description + "', " + 
     std::to_string(product.price) + ");";
   return executeSQL(sql);
 }
 
-bool DBOperator::updateProduct(const Product& product) {
+bool DBOperator::updateProduct(const NewProduct& product) {
   std::string sql = "UPDATE Products SET name = '" + product.name + "', description = '" + 
     product.description + "', price = " + std::to_string(product.price) +
     " WHERE id = " + std::to_string(product.id) + ";";

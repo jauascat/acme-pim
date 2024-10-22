@@ -31,23 +31,16 @@ public:
     }
 };
 
-template <typename Child, typename... InputTypes>
+template <typename Child>
 class TerminalOp : public TerminalOperation {
 public:
-    using Operate = std::function<void(InputTypes..., const std::unordered_map<std::string, std::string>&)>;
-    Operate _operate;
     TerminalOp() = default;
 
     Child& withDictionary(const std::unordered_map<std::string, std::string>& newDictionary) {
         _dictionary = newDictionary;
         return static_cast<Child&>(*this);
     }
-
-    Child& onInput(Operate callback) {
-        _operate = callback;
-        return static_cast<Child&>(*this);
-    }
-
+    
     void executeSafetly(std::function<void()> onPrompt) {
         try {
             _print(this->_dictionary.at("prompt"));
@@ -61,7 +54,7 @@ public:
 class TeOpProductAdd final : public TerminalOperation2<TeOpProductAdd> {
 public:
     void execute() override {
-        std::string name = _getTerminalInput2<std::string>(
+        auto name = _getTerminalInput2<std::string>(
             "Ingrese el nombre del producto: ",
             [](const std::string &value) {
                 bool isValid = !value.empty();
@@ -71,7 +64,7 @@ public:
                 return std::make_pair(isValid, "");
             }
         );
-        std::string description = _getTerminalInput2<std::string>(
+        auto description = _getTerminalInput2<std::string>(
             "Ingrese la descripcion del producto: ",
             [](const std::string &value) {
                 bool isValid = !value.empty();
@@ -81,17 +74,20 @@ public:
                 return std::make_pair(isValid, "");
             }
         );
-        double price = _getTerminalInput2<double>(
+        auto price = _getTerminalInput2<double>(
             "Ingrese el precio del producto: ",
             [](const double &value) {
-                bool isValid = value <= 0;
+                bool isValid = value > 0;
                 if (!isValid) {
                     return std::make_pair(isValid, "El precio del producto debe ser mayor a cero.");
                 }
                 return std::make_pair(isValid, "");
             }
         );
-        // Product product = Product(0, name, description, price);
+        NewProduct product;
+        product.name = name;
+        product.description = description;
+        product.price = price;
         //log product
         _print("Producto añadido con exito!\n");
         // _print("Nombre: ", product.name, "\n");

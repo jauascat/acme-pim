@@ -25,7 +25,7 @@ T _getTerminalInput2(const std::string &prompt, std::function<std::pair<bool, st
   {
     try
     {
-      _print(prompt); // Print the prompt
+      _print(prompt);
       std::cin >> value;
 
       if (std::cin.fail())
@@ -33,19 +33,18 @@ T _getTerminalInput2(const std::string &prompt, std::function<std::pair<bool, st
         throw std::invalid_argument("Invalid input type.");
       }
 
-      // Validate the input and get the validation result and error message
-      auto [isValid, validationMsg] = validate(value);
+      std::pair<bool, std::string> [isValid, validationMsg] = validate(value);
       if (!isValid)
       {
         throw std::invalid_argument(validationMsg);
       }
 
-      break; // If valid, break out of the loop
+      break;
     }
     catch (const std::exception &e)
     {
-      _print(e.what(), "\n"); // Print error message
-      std::cin.clear(); // Clear error flag
+      _print(e.what(), "\n");
+      std::cin.clear();
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Ignore invalid input
     }
   }
