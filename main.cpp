@@ -1,9 +1,11 @@
 #include "./src/View/terminal_implementations.h"
+#include "./src/Lab/LabLogic/Queue.h"
 
 int main()
 {
-  auto app = GetAppInstance();
+  Queue queue;
+  auto app = GetAppInstance(queue);
   app.execute();
-  app.queue.destruirCola();
+  queue.destruirCola();
   return 0;
 }

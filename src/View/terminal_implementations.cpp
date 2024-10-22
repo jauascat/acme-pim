@@ -5,7 +5,7 @@
 #include "SubMenus/Variants/Variantes.h"
 #include "../Lab/LabMenu.h"
 
-TerminalApp GetAppInstance()
+TerminalApp GetAppInstance(Queue& queue)
 {
   auto app = TerminalApp::Builder()
     .withDictionary({
@@ -18,7 +18,7 @@ TerminalApp GetAppInstance()
     //.withOperation<TerminalApp>(getSubmenuCategorias())
     //.withOperation<TerminalApp>(getSubmenuBusqueda())
     //.withOperation<TerminalApp>(getSubmenuVariantes())
-    .withOperation<TerminalApp>(getMenuGestionTurnos())
+    .withOperation<TerminalApp>(getMenuGestionTurnos(queue))
     .build();
 
   return app;

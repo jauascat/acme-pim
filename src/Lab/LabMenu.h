@@ -1,16 +1,9 @@
-//
-// Created by rolor on 21/10/2024.
-//
-
 #ifndef LABMENU_H
 #define LABMENU_H
 
+#include "../../src/View/terminal.h"
+#include "../../src/View/Utils/io.h"
 
-
-class LabMenu {
-
-};
-
-
+TerminalApp getMenuGestionTurnos(Queue queue);
 
 #endif //LABMENU_H

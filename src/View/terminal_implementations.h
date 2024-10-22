@@ -3,5 +3,5 @@
 #include "terminal.h"
 #include "../View/Utils/io.h"
 
-TerminalApp GetAppInstance();
+TerminalApp GetAppInstance(Queue& queue);
 

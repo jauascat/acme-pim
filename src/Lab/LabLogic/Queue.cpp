@@ -75,5 +75,6 @@ void Queue::destruirCola() {
     frente = 0;
     final = -1;
     longitud = 0; // Resetea la cola
+    datos.clear();
 }
 

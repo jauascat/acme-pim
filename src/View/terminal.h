@@ -76,10 +76,8 @@ private:
 
 public:
     class Builder;
-    Queue queue;  // Instancia de la cola de turnos
     void execute();
     void _showOptions() const;
-    void destruirCola();
 };
 
 
