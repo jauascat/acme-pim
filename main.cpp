@@ -13,6 +13,8 @@ public:
   ColaNode(T element) : data(element), next(nullptr) {}
 };
 
+
+
 template <typename T>
 class Cola
 {
@@ -134,32 +136,30 @@ int main()
 {
     Cola<std::string> queue;
 
-    // Enqueue elements
+    // Insertar elementos
     queue.insertarElem("item1");
     queue.insertarElem("item2");
     queue.insertarElem("item3");
 
     std::cout << "Queue length: " << queue.getLength() << std::endl;
 
+    // Listar elementos
     queue.listarTurnos();
 
-    // Dequeue elements
+    // Atender elementos
     std::string frontItem;
     if (queue.atender(frontItem)) {
-        std::cout << "Dequeued: " << frontItem << std::endl;
+        std::cout << "atendido al turno: " << frontItem << std::endl;
     }
+    std::cout << "largo de la cola: " << queue.getLength() << std::endl;
 
-    std::cout << "Queue length after dequeue: " << queue.getLength() << std::endl;
-
-    // Remove element at position 1
+    // Eliminar elemento en posicion 1
     if (queue.removeAt(1)) {
-        std::cout << "Removed item at position 1." << std::endl;
+        std::cout << "Removido el turno en la posicion 1." << std::endl;
     }
 
-    std::cout << "Queue length after removal: " << queue.getLength() << std::endl;
-
-    // Check last element
-    std::cout << "Last element in queue: " << queue.getUltimo() << std::endl;
+    // Listar elementos
+    queue.listarTurnos();
 
 
   return 0;
