@@ -1,8 +1,10 @@
 #include "LabMenu.h"
 
-TerminalApp getMenuGestionTurnos(Queue queue) {
+#include <string>
+
+TerminalApp getMenuGestionTurnos(Cola<std::string> queue) {
     // Operación para insertar un turno
-    auto insertarTurno = UnaryOperation<string>()
+    auto insertarTurno = UnaryOperation<std::string>()
         .withDictionary({
             {"prompt", "Ingrese el turno alfanumerico (ej. A001): "},
             {"description", "Insertar un nuevo turno"},
@@ -19,15 +21,16 @@ TerminalApp getMenuGestionTurnos(Queue queue) {
         });
 
     // Operación para atender a un cliente
-    auto atenderTurno = UnaryOperation<string>()
+    auto atenderTurno = UnaryOperation<std::string>()
         .withDictionary({
+            {"prompt", "Ingrese 0 para continuar"},
             {"description", "Atender al proximo cliente en la cola"},
             {"result", "Cliente atendido!\n"},
             {"error", "No hay clientes en espera.\n"}
         })
         .onInput([&queue](std::string value,  auto &dict) {
             if (!queue.esVaciaCola()) {
-                string turno;
+                std::string turno;
                 queue.atender(turno);
                 _print("Turno atendido: ", turno, "\n", dict.at("result"));
             } else {
@@ -36,8 +39,9 @@ TerminalApp getMenuGestionTurnos(Queue queue) {
         });
 
     // Operación para listar los turnos
-    auto listarTurnos = UnaryOperation<string>()
+    auto listarTurnos = UnaryOperation<std::string>()
         .withDictionary({
+            {"prompt", "Ingrese 0 para continuar"},
             {"description", "Listar todos los turnos en la cola"},
             {"result", "Turnos en cola:\n"},
             {"error", "No hay turnos en la cola.\n"}
@@ -54,7 +58,7 @@ TerminalApp getMenuGestionTurnos(Queue queue) {
     // Operación para eliminar un turno por su posición
     auto eliminarTurno = UnaryOperation<int>()
         .withDictionary({
-            {"prompt", "Ingrese la posición del turno a eliminar: "},
+            {"prompt", "Ingrese 0 para continuar"},
             {"description", "Eliminar un turno por posicion"},
             {"result", "Turno eliminado con exito!\n"},
             {"error", "Error al eliminar el turno. Verifique la posicion.\n"}

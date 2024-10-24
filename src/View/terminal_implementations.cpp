@@ -5,7 +5,7 @@
 #include "SubMenus/Variants/Variantes.h"
 #include "../Lab/LabMenu.h"
 
-TerminalApp GetAppInstance(Queue& queue)
+TerminalApp GetAppInstance(Cola<std::string>& queue)
 {
   auto app = TerminalApp::Builder()
     .withDictionary({

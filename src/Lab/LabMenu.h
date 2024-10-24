@@ -2,8 +2,11 @@
 #define LABMENU_H
 
 #include "../../src/View/terminal.h"
+#include "../../src/Lab/LabLogic/Queue.h"
 #include "../../src/View/Utils/io.h"
 
-TerminalApp getMenuGestionTurnos(Queue queue);
+#include <string>
+
+TerminalApp getMenuGestionTurnos(Cola<std::string> queue);
 
 #endif //LABMENU_H

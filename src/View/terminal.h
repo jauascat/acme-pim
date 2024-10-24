@@ -70,6 +70,15 @@ public:
     }
 };
 
+class NonUnaryOperation final : public TerminalOp<NonUnaryOperation> {
+public:
+    void execute() override {
+        this->executeSafetly([&]() {
+            this->_operate(this->_dictionary);
+        });
+    }
+};
+
 class TerminalApp : public TerminalOp<TerminalApp> {
 private:
     std::vector<std::unique_ptr<TerminalOperation>> _operations;
