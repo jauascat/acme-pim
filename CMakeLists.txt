@@ -7,8 +7,8 @@ find_package(SQLite3 REQUIRED)
 
 add_executable(acme_pim
     main.cpp
-    src/store/db.cpp
-    src/store/setup.cpp
+    # src/store/db.cpp
+    # src/store/setup.cpp
     # src/io/terminal.cpp
     # src/io/terminal_implementations.cpp
 )

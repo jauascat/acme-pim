@@ -3,8 +3,8 @@
 #include "terminal.h"
 #include "io.h" 
 
-TerminalApp getSubmenuProductos();
-TerminalApp getSubmenuCategorias();
-TerminalApp getSubmenuBusqueda();
-TerminalApp GetAppInstance();
+TerminalMenu getSubmenuProductos();
+TerminalMenu getSubmenuCategorias();
+TerminalMenu getSubmenuBusqueda();
+TerminalMenu GetAppInstance();
 

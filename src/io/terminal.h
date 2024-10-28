@@ -51,7 +51,7 @@ public:
     }
 };
 
-class TeOpProductAdd final : public TerminalOperation2<TeOpProductAdd> {
+class FormProductAdd final : public TerminalOperation2<FormProductAdd> {
 public:
     void execute() override {
         auto name = _getTerminalInput2<std::string>(
@@ -84,7 +84,7 @@ public:
                 return std::make_pair(isValid, "");
             }
         );
-        NewProduct product;
+        ProductNew product;
         product.name = name;
         product.description = description;
         product.price = price;
@@ -119,9 +119,9 @@ public:
     }
 };
 
-class TerminalApp : public TerminalOp<TerminalApp> {
+class TerminalMenu : public TerminalOp<TerminalMenu> {
 private:
-    std::vector<std::unique_ptr<TerminalOperation>> _operations;
+    std::vector<std::unique_ptr<TerminalOperation>> _menuOptions;
 
 public:
     class Builder;
@@ -131,8 +131,8 @@ public:
 };
 
 
-class TerminalApp::Builder {
-    TerminalApp _app;
+class TerminalMenu::Builder {
+    TerminalMenu _app;
 
 public:
     Builder() : _app() {}
@@ -144,11 +144,11 @@ public:
 
     template <typename T, typename... Args>
     Builder& withOperation(Args&&... args) {
-        _app._operations.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+        _app._menuOptions.push_back(std::make_unique<T>(std::forward<Args>(args)...));
         return *this;
     }
 
-    TerminalApp build() {
+    TerminalMenu build() {
         return std::move(_app);
     }
 };

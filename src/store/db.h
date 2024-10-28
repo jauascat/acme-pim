@@ -6,18 +6,18 @@
 #include "../models/product.h"
 #include "../models/category.h"
 
-class DBOperator {
+class Database {
 private:
     sqlite3* db;
 
-    bool executeSQL(const std::string& sql);
+    bool executeSQL(sqlite3* db, const std::string& sql);
 
 public:
-    DBOperator(const std::string& dbName);
-    ~DBOperator();
+    Database(const std::string& dbName);
+    ~Database();
 
-    bool addProduct(const NewProduct& product);
-    bool updateProduct(const NewProduct& product);
+    bool addProduct(const ProductNew& product);
+    bool updateProduct(const ProductNew& product);
     bool deleteProduct(int productId);
 
     bool addCategory(const Category& category);

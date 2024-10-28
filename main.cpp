@@ -6,105 +6,373 @@
 #include <functional>
 #include <sstream>
 #include <limits>
+#include <sqlite3.h>
 
-#include "src/store/setup.h"
+#include "src/models/product.h"
+#include "src/models/category.h"
 
-template <typename... Args>
-void _print(Args &&...args)
+class Database
 {
-  ((std::cout << std::forward<Args>(args)), ...);
-}
+private:
+  sqlite3 *db;
 
-class NewProduct {
-public:
-    std::string name;
-    std::string description;
-    double price;
-
-    NewProduct(const std::string& name, const std::string& description, double price)
-      : name(name), description(description), price(price) {}
-};
-
-
-template <typename T>
-T _getTerminalInput2(const std::string &prompt, std::function<std::pair<bool, std::string>(const T &)> validate)
-{
-  T value;
-  while (true)
+  bool executeSQL(const std::string &sql)
   {
-    try
-    {
-      _print(prompt);
-      std::cin >> value;
-
-      if (std::cin.fail())
-      {
-        throw std::invalid_argument("read input error");
-      }
-
-      auto [isValid, validationMsg] = validate(value);
-      if (!isValid)
-      {
-        throw std::invalid_argument(validationMsg);
-      }
-
-      break;
+    char* errMsg = nullptr;
+    int rc = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errMsg);
+    
+    if (rc != SQLITE_OK) {
+      std::cerr << "SQL error (" << rc << "): " << (errMsg ? errMsg : "Unknown error") << std::endl;
+      if (errMsg) sqlite3_free(errMsg);
+      return false;
     }
-    catch (const std::exception &e)
-    {
-      _print(e.what(), "\n");                                             
-      std::cin.clear();                                                   
-      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return true;
+  }
+
+public:
+  Database(const std::string &dbName)
+  {
+    int rc = sqlite3_open(dbName.c_str(), &db);
+    if (rc != SQLITE_OK) {
+      std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
+      db = nullptr;
+    } else {
+      buildDB(dbName);
     }
   }
-  return value;
-}
 
+  ~Database()
+  {
+    if (db)
+    {
+      sqlite3_close(db);
+    }
+  }
+
+  bool addProduct(const ProductNew &product)
+  {
+    std::string sql = "INSERT INTO Products (name, description, price) VALUES ('" +
+                      product.name + "', '" + product.description + "', " +
+                      std::to_string(product.price) + ");";
+    return executeSQL(sql);
+  }
+
+  bool updateProduct(const ProductNew &product)
+  {
+    std::string sql = "UPDATE Products SET name = '" + product.name + "', description = '" +
+                      product.description + "', price = " + std::to_string(product.price) +
+                      " WHERE id = " + std::to_string(product.id) + ";";
+    return executeSQL(sql);
+  }
+
+  bool deleteProduct(int productId)
+  {
+    std::string sql = "DELETE FROM Products WHERE id = " + std::to_string(productId) + ";";
+    return executeSQL(sql);
+  }
+
+  bool addCategory(const Category &category)
+  {
+    std::string sql = "INSERT INTO Categories (name, description) VALUES ('" +
+                      category.name + "', '" + category.description + "');";
+    return executeSQL(sql);
+  }
+
+  bool updateCategory(const Category &category)
+  {
+    std::string sql = "UPDATE Categories SET name = '" + category.name + "', description = '" +
+                      category.description + "' WHERE id = " + std::to_string(category.id) + ";";
+    return executeSQL(sql);
+  }
+
+  bool deleteCategory(int categoryId)
+  {
+    std::string sql = "DELETE FROM Categories WHERE id = " + std::to_string(categoryId) + ";";
+    return executeSQL(sql);
+  }
+
+  void buildDB(const std::string& name)
+  {
+    if(!db) {
+      return;
+    }
+    executeSQL(R"(
+        CREATE TABLE IF NOT EXISTS Products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            price REAL,
+            UNIQUE(name)
+        );
+    )");
+
+    executeSQL(R"(
+        CREATE TABLE IF NOT EXISTS Categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            UNIQUE(name)
+        );
+    )");
+
+    executeSQL(R"(
+        CREATE TABLE IF NOT EXISTS ProductCategories (
+            product_id INTEGER,
+            category_id INTEGER,
+            PRIMARY KEY (product_id, category_id),
+            FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE CASCADE,
+            FOREIGN KEY (category_id) REFERENCES Categories(id) ON DELETE CASCADE
+        );
+    )");
+  }
+};
+
+class PIM {
+private:
+  Database db;
+public:
+  PIM(const std::string &dbName) : db(dbName) {
+
+  }
+
+  bool addProduct(const ProductNew& product) {
+    return db.addProduct(product);
+  }
+
+  bool updateProduct(const ProductNew& product) {
+    return db.updateProduct(product);
+  }
+
+  bool deleteProduct(int productId) {
+    return db.deleteProduct(productId);
+  }
+
+  bool addCategory(const Category& category) {
+    return db.addCategory(category);
+  }
+
+  bool updateCategory(const Category& category) {
+    return db.updateCategory(category);
+  }
+
+  bool deleteCategory(int categoryId) {
+    return db.deleteCategory(categoryId);
+  }
+};
 
 class TerminalOperation
 {
 public:
-  std::unordered_map<std::string, std::string> _dictionary;
-  virtual ~TerminalOperation() = default;
   virtual void execute() = 0;
-  std::string getDescription() const
+  virtual ~TerminalOperation() {}
+  std::string getDictionaryDescription() const
   {
-    return _dictionary.at("description");
+    return _dictionaryDescription;
   }
-};
+private:
 
+protected:
+  PIM *_pim;
+  std::string _dictionaryDescription;
+  std::string _dictionaryTitle;
+  std::string _dictionaryPrompt;
 
-template <typename Child>
-class TerminalOperation2 : public TerminalOperation
-{
-public:
-  Child &withDictionary(const std::unordered_map<std::string, std::string> &newDictionary)
+  template <typename... Args>
+  void _print(Args &&...args)
   {
-    _dictionary = newDictionary;
-    return static_cast<Child &>(*this);
+    ((std::cout << std::forward<Args>(args)), ...);
   }
-};
 
-class TeOpProductAdd final : public TerminalOperation2<TeOpProductAdd>
-{
-public:
-  TeOpProductAdd() {
-    this->withDictionary({{"description", "Agregar un producto"}});
-  };
-  void execute() override
+  template <typename T>
+  T _getUserInput(const std::string &prompt, std::function<std::pair<bool, std::string>(const T &)> validate)
   {
-    auto name = _getTerminalInput2<std::string>(
-      "Ingrese el nombre del producto: ",
-      [](const std::string &value)
+    T value;
+    while (true)
+    {
+      try
       {
-        bool isValid = !value.empty();
+        _print(prompt);
+        std::cin >> value;
+
+        if (std::cin.fail())
+        {
+          throw std::invalid_argument("read input error");
+        }
+
+        auto [isValid, validationMsg] = validate(value);
         if (!isValid)
         {
-          return std::make_pair(isValid, "El nombre del producto no puede estar vacio.");
+          throw std::invalid_argument(validationMsg);
         }
-        return std::make_pair(isValid, "");
-      });
-    auto description = _getTerminalInput2<std::string>(
+
+        break;
+      }
+      catch (const std::exception &e)
+      {
+        _print(e.what(), "\n");
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      }
+    }
+    return value;
+  }
+
+  void _setPIM(PIM *pim)
+  {
+    _pim = pim;
+  }
+
+
+  PIM* _getPIM()
+  {
+    return _pim;
+  }
+
+  void _setDictionaryDescription(const std::string &description)
+  {
+    _dictionaryDescription = description;
+  }
+
+  void _setDictionaryTitle(const std::string &title)
+  {
+    _dictionaryTitle = title;
+  }
+
+  void _setDictionaryPrompt(const std::string &prompt)
+  {
+    _dictionaryPrompt = prompt;
+  }
+
+  std::string _getDictionaryTitle() const
+  {
+    return _dictionaryTitle;
+  }
+
+  std::string _getDictionaryPrompt() const
+  {
+    return _dictionaryPrompt;
+  }
+};
+
+class TerminalMenu : public TerminalOperation
+{
+private:
+  std::vector<std::unique_ptr<TerminalOperation>> _menuOptions;
+  std::string _dictionaryInvalidOption;
+  std::string _dictionaryExit;
+
+protected:
+  void _setDictionaryInvalidOption(const std::string &invalidOptionMessage)
+  {
+    _dictionaryInvalidOption = invalidOptionMessage;
+  }
+
+  void _setDictionaryExit(const std::string &exitMessage)
+  {
+    _dictionaryExit = exitMessage;
+  }
+
+  std::string _getDictionaryInvalidOption() const
+  {
+    return _dictionaryInvalidOption;
+  }
+
+  std::string _getDictionaryExit() const
+  {
+    return _dictionaryExit;
+  }
+
+  int _getOptionsQuantity() const
+  {
+    return static_cast<int>(_menuOptions.size());
+  }
+
+  template <typename T>
+  void _setMenuOption(T &&operation)
+  {
+    _menuOptions.push_back(std::make_unique<T>(operation));
+  }
+
+  void _showMenuOptions()
+  {
+    int optionsQuantity = _getOptionsQuantity();
+    _print("\n===== ", _getDictionaryTitle(), " =====\n");
+    for (size_t i = 0; i < optionsQuantity; ++i)
+    {
+      _print(i + 1, ". ", _menuOptions[i]->getDictionaryDescription(), "\n");
+    }
+    _print(optionsQuantity + 1, ". Exit\n");
+  }
+
+  int _getUserInputOption()
+  {
+    return _getUserInput<int>(
+      _getDictionaryPrompt(),
+      [this](const int &inputOption) -> std::pair<bool, std::string>
+      {
+        if (inputOption < 1 || inputOption > _getOptionsQuantity() + 1)
+        {
+          return std::make_pair(false, _getDictionaryInvalidOption());
+        }
+        return std::make_pair(true, std::string());
+      }
+      );
+  }
+
+public:
+  void execute()
+  {
+    while (true)
+    {
+      _showMenuOptions();
+      int selectedOption = _getUserInputOption();
+
+      if (selectedOption == selectedOption + 1)
+      {
+        _print(_getDictionaryExit());
+        break;
+      }
+      _menuOptions[selectedOption - 1]->execute();
+    }
+  }
+};
+
+class FormProductAdd final : public TerminalOperation
+{
+public:
+  FormProductAdd(PIM* pim)
+  {
+    _setPIM(pim);
+    _setDictionaryDescription("Crear un producto");
+  }
+  void execute() override
+  {
+    std::string name = _getNewProductName();
+    std::string description = _getNewProductDescription();
+    double price = _getNewProductPrice();
+    const ProductNew product(name, description, price);
+
+    _pim->addProduct(product);
+  }
+
+private:
+  std::string _getNewProductName()
+  {
+    return _getUserInput<std::string>(
+        "Ingrese el nombre del producto: ",
+        [](const std::string &value)
+        {
+          bool isValid = !value.empty();
+          if (!isValid)
+          {
+            return std::make_pair(isValid, "El nombre del producto no puede estar vacio.");
+          }
+          return std::make_pair(isValid, "");
+        });
+  }
+  std::string _getNewProductDescription()
+  {
+    return _getUserInput<std::string>(
         "Ingrese la descripcion del producto: ",
         [](const std::string &value)
         {
@@ -114,9 +382,11 @@ public:
             return std::make_pair(isValid, "La descripcion del producto no puede estar vacia.");
           }
           return std::make_pair(isValid, "");
-        }
-      );
-    double price = _getTerminalInput2<double>(
+        });
+  }
+  double _getNewProductPrice()
+  {
+    return _getUserInput<double>(
         "Ingrese el precio del producto: ",
         [](const double &value)
         {
@@ -127,105 +397,29 @@ public:
           }
           return std::make_pair(isValid, "");
         });
-    NewProduct newProduct(name, description, price);
-    _print("Producto añadido con exito!\n");
-    _print("Nombre: ", newProduct.name, "\n");
-    _print("Descripcion: ", newProduct.description, "\n");
-    _print("Precio: ", newProduct.price, "\n");
   }
 };
 
-class TerminalApp : public TerminalOperation2<TerminalApp>
+class App final : public TerminalMenu
 {
-private:
-  std::vector<std::unique_ptr<TerminalOperation>> _operations;
-
 public:
-  class Builder;
-
-  void execute()
+  App(PIM* pim)
   {
-    while (true)
-    {
-      _showOptions();
+    _setPIM(pim);
+    _setDictionaryTitle("Proyecto!");
+    _setDictionaryPrompt("Elija una opcion: ");
+    _setDictionaryExit("Saliendo...\n");
+    _setDictionaryInvalidOption("Opcion invalida, por favor intentalo de nuevo.\n");
 
-      std::string input;
-      std::getline(std::cin, input);
-
-      std::stringstream ss(input);
-      int option;
-      if (!(ss >> option) || !(ss.eof()))
-      {
-        _print(_dictionary.at("invalid_option"));
-        continue;
-      }
-
-      if (option == static_cast<int>(_operations.size()) + 1)
-      {
-        _print(_dictionary.at("exit"));
-        break;
-      }
-
-      if (option > 0 && static_cast<int>(option) <= _operations.size())
-      {
-        _operations[option - 1]->execute();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-      }
-      else
-      {
-        _print(_dictionary.at("invalid_option"));
-      }
-    }
-  }
-  void _showOptions() const {
-      _print("\n===== ", _dictionary.at("title"), " =====\n");
-      for (size_t i = 0; i < _operations.size(); ++i) {
-          _print(i + 1, ". ", _operations[i]->getDescription(), "\n");
-      }
-      _print(_operations.size() + 1, ". Exit\n");
-      _print(_dictionary.at("prompt"));
-  }
-
-};
-
-class TerminalApp::Builder
-{
-  TerminalApp _app;
-
-public:
-  Builder() : _app() {}
-
-  Builder& withDictionary(const std::unordered_map<std::string, std::string> &dictionary)
-  {
-    _app._dictionary = dictionary;
-    return *this;
-  }
-
-  template <typename T>
-  Builder& withOperation(T &operation)
-  {
-    _app._operations.push_back(std::make_unique<T>(operation));
-    return *this;
-  }
-
-  TerminalApp build()
-  {
-    return std::move(_app);
-  }
+    _setMenuOption<FormProductAdd>(FormProductAdd(pim));
+    _setMenuOption<FormProductAdd>(FormProductAdd(pim));
+  };
 };
 
 int main()
 {
-  auto addProduct = TeOpProductAdd();
-  auto app = TerminalApp::Builder()
-                 .withDictionary({{"title", "Proyecto!"},
-                                  {"prompt", "Elija una opcion: "},
-                                  {"exit", "Saliendo...\n"},
-                                  {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}})
-                 .withOperation<TeOpProductAdd>(addProduct)
-                 .withOperation<TeOpProductAdd>(addProduct)
-                 .build();
+  PIM *pim = new PIM("pim.db");
+  App app(pim);
   app.execute();
-  // buildDB();
   return 0;
 }

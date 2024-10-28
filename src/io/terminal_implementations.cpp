@@ -2,24 +2,24 @@
 #include <limits>
 #include <thread>
 
-TerminalApp GetAppInstance()
+TerminalMenu GetAppInstance()
 {
-  auto app = TerminalApp::Builder()
+  auto app = TerminalMenu::Builder()
     .withDictionary({
       {"title", "Proyecto!"},
       {"prompt", "Elija una opcion: "},
       {"exit", "Saliendo...\n"},
       {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<TerminalApp>(getSubmenuProductos())
-    .withOperation<TerminalApp>(getSubmenuCategorias())
-    .withOperation<TerminalApp>(getSubmenuBusqueda())
+    .withOperation<TerminalMenu>(getSubmenuProductos())
+    .withOperation<TerminalMenu>(getSubmenuCategorias())
+    .withOperation<TerminalMenu>(getSubmenuBusqueda())
     .build();
 
   return app;
 }
 
-TerminalApp getSubmenuProductos()
+TerminalMenu getSubmenuProductos()
 {
   auto modificarProducto = UnaryOperation<int>()
   .withDictionary({
@@ -109,13 +109,13 @@ TerminalApp getSubmenuProductos()
         }
       });
 
-  auto addProduct = TeOpProductAdd()
+  auto addProduct = FormProductAdd()
     .withDictionary({
       {"description", "Crear un producto"}
       // {"result", "Producto creado con exito!\n"},
       // {"error", "Error al crear el producto.\n"}
     });
-  auto menuProductos = TerminalApp::Builder()
+  auto menuProductos = TerminalMenu::Builder()
     .withDictionary({
       {"title", "Proyecto!"},
       {"description", "Submenu Productos"},
@@ -123,7 +123,7 @@ TerminalApp getSubmenuProductos()
       {"exit", "Saliendo...\n"},
       {"invalid_option", "Opcion invalida, por favor intentalo de nuevo.\n"}
     })
-    .withOperation<TeOpProductAdd>(addProduct)
+    .withOperation<FormProductAdd>(addProduct)
     .withOperation<UnaryOperation<int>>(modificarProducto)
     .withOperation<UnaryOperation<int>>(eliminarProducto)
     .withOperation<UnaryOperation<int>>(listarProductos)
@@ -133,7 +133,7 @@ TerminalApp getSubmenuProductos()
   return menuProductos;
 }
 
-TerminalApp getSubmenuCategorias()
+TerminalMenu getSubmenuCategorias()
 {
   auto crearCategoria = UnaryOperation<std::string>()
     .withDictionary({
@@ -183,7 +183,7 @@ TerminalApp getSubmenuCategorias()
       _print(dict.at("result"));
     });
 
-    auto submenuCategorias = TerminalApp::Builder()
+    auto submenuCategorias = TerminalMenu::Builder()
     .withDictionary({
       {"title", "Proyecto!"},
       {"description", "Submenu Categorias"},
@@ -200,7 +200,7 @@ TerminalApp getSubmenuCategorias()
   return submenuCategorias;
 }
 
-TerminalApp getSubmenuBusqueda()
+TerminalMenu getSubmenuBusqueda()
 {
   auto buscarNombre = UnaryOperation<std::string>()
     .withDictionary({
@@ -246,7 +246,7 @@ TerminalApp getSubmenuBusqueda()
       _print(dict.at("result"));
     });
 
-    auto submenuBusqueda = TerminalApp::Builder()
+    auto submenuBusqueda = TerminalMenu::Builder()
     .withDictionary({
       {"title", "Proyecto!"},
       {"description", "Submenu Busqueda"},

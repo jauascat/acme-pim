@@ -1,7 +1,7 @@
 #include "terminal.h"
 #include <limits>
 
-void TerminalApp::execute() {
+void TerminalMenu::execute() {
     while (true) {
         _showOptions();
 
@@ -15,13 +15,13 @@ void TerminalApp::execute() {
             continue;
         }
 
-        if (option == static_cast<int>(_operations.size()) + 1) {
+        if (option == static_cast<int>(_menuOptions.size()) + 1) {
             _print(_dictionary.at("exit"));
             break;
         }
 
-        if (option > 0 && static_cast<int>(option) <= _operations.size()) {
-            _operations[option - 1]->execute();
+        if (option > 0 && static_cast<int>(option) <= _menuOptions.size()) {
+            _menuOptions[option - 1]->execute();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         } else {
             _print(_dictionary.at("invalid_option"));
@@ -29,11 +29,11 @@ void TerminalApp::execute() {
     }
 }
 
-void TerminalApp::_showOptions() const {
+void TerminalMenu::_showOptions() const {
     _print("\n===== ", _dictionary.at("title"), " =====\n");
-    for (size_t i = 0; i < _operations.size(); ++i) {
-        _print(i + 1, ". ", _operations[i]->getDescription(), "\n");
+    for (size_t i = 0; i < _menuOptions.size(); ++i) {
+        _print(i + 1, ". ", _menuOptions[i]->getDescription(), "\n");
     }
-    _print(_operations.size() + 1, ". Exit\n");
+    _print(_menuOptions.size() + 1, ". Exit\n");
     _print(_dictionary.at("prompt"));
 }
