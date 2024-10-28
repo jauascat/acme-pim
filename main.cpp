@@ -344,14 +344,15 @@ public:
   {
     _setPIM(pim);
     _setDictionaryDescription("Crear un producto");
+    _setDictionaryPrompt("Ingrese el nombre del producto:");
   }
   void execute() override
   {
+    _print(_getDictionaryPrompt());
     std::string name = _getNewProductName();
     std::string description = _getNewProductDescription();
     double price = _getNewProductPrice();
     const ProductNew product(name, description, price);
-
     _pim->addProduct(product);
   }
 
@@ -399,6 +400,43 @@ private:
         });
   }
 };
+
+// class FormProductEdit final : public TerminalOperation
+// {
+// public:
+//   FormProductEdit(PIM* pim)
+//   {
+//     _setPIM(pim);
+//     _setDictionaryDescription("Editar un producto");
+//     _setDictionaryPrompt("Ingrese el nombre del producto:");
+//   }
+//   void execute() override
+//   {
+//     _print(_getDictionaryPrompt());
+//     Product productToEdit = _getProductToEditByName();
+//     std::string description = _getNewProductDescription();
+//     double price = _getNewProductPrice();
+//     const ProductNew product(name, description, price);
+//     _pim->updateProduct(product);
+//   }
+
+// private:
+//   Product _getProductToEditByName()
+//   {
+//     return _getUserInput<Product>(
+//         "Ingrese el nombre del producto: ",
+//         [this](const Product &value)
+//         {
+//           bool isValid = !value.name.empty();
+//           Product product = this->_pim->getProductByName(value.name);
+//           if (!isValid)
+//           {
+//             return std::make_pair(isValid, "El nombre del producto no puede estar vacio.");
+//           }
+//           return std::make_pair(isValid, "");
+//         });
+//   }
+// };
 
 class App final : public TerminalMenu
 {
