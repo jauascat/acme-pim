@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "../store/database.h"
+#include "../database/database.h"
 #include "../models/product.h"
 #include "../models/category.h"
 

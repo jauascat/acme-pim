@@ -8,137 +8,105 @@
 #include <limits>
 #include <sqlite3.h>
 
-#include "src/store/database.h"
+#include "src/database/database.h"
 #include "src/models/product.h"
 #include "src/models/category.h"
 #include "src/models/pim.h"
+#include "src/View/terminal_operation.h"
 
-// class PIM {
-// private:
-//   Database db;
+// class TerminalOperation
+// {
 // public:
-//   PIM(const std::string &dbName) : db(dbName) {
+//   virtual void execute() = 0;
+//   virtual ~TerminalOperation() {}
+//   std::string getDictionaryDescription() const
+//   {
+//     return _dictionaryDescription;
+//   }
+// private:
 
+// protected:
+//   PIM *_pim;
+//   std::string _dictionaryDescription;
+//   std::string _dictionaryTitle;
+//   std::string _dictionaryPrompt;
+
+//   template <typename... Args>
+//   void _print(Args &&...args)
+//   {
+//     ((std::cout << std::forward<Args>(args)), ...);
 //   }
 
-//   bool addProduct(const ProductNew& product) {
-//     return db.addProduct(product);
+//   template <typename T>
+//   T _getUserInput(const std::string &prompt, std::function<std::pair<bool, std::string>(const T &)> validate)
+//   {
+//     T value;
+//     while (true)
+//     {
+//       try
+//       {
+//         _print(prompt);
+//         std::cin >> value;
+
+//         if (std::cin.fail())
+//         {
+//           throw std::invalid_argument("read input error");
+//         }
+
+//         auto [isValid, validationMsg] = validate(value);
+//         if (!isValid)
+//         {
+//           throw std::invalid_argument(validationMsg);
+//         }
+
+//         break;
+//       }
+//       catch (const std::exception &e)
+//       {
+//         _print(e.what(), "\n");
+//         std::cin.clear();
+//         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+//       }
+//     }
+//     return value;
 //   }
 
-//   bool updateProduct(const ProductNew& product) {
-//     return db.updateProduct(product);
+//   void _setPIM(PIM *pim)
+//   {
+//     _pim = pim;
 //   }
 
-//   bool deleteProduct(int productId) {
-//     return db.deleteProduct(productId);
+
+//   PIM* _getPIM()
+//   {
+//     return _pim;
 //   }
 
-//   bool addCategory(const Category& category) {
-//     return db.addCategory(category);
+//   void _setDictionaryDescription(const std::string &description)
+//   {
+//     _dictionaryDescription = description;
 //   }
 
-//   bool updateCategory(const Category& category) {
-//     return db.updateCategory(category);
+//   void _setDictionaryTitle(const std::string &title)
+//   {
+//     _dictionaryTitle = title;
 //   }
 
-//   bool deleteCategory(int categoryId) {
-//     return db.deleteCategory(categoryId);
+//   void _setDictionaryPrompt(const std::string &prompt)
+//   {
+//     _dictionaryPrompt = prompt;
+//   }
+
+//   std::string _getDictionaryTitle() const
+//   {
+//     return _dictionaryTitle;
+//   }
+
+//   std::string _getDictionaryPrompt() const
+//   {
+//     return _dictionaryPrompt;
 //   }
 // };
-
-class TerminalOperation
-{
-public:
-  virtual void execute() = 0;
-  virtual ~TerminalOperation() {}
-  std::string getDictionaryDescription() const
-  {
-    return _dictionaryDescription;
-  }
-private:
-
-protected:
-  PIM *_pim;
-  std::string _dictionaryDescription;
-  std::string _dictionaryTitle;
-  std::string _dictionaryPrompt;
-
-  template <typename... Args>
-  void _print(Args &&...args)
-  {
-    ((std::cout << std::forward<Args>(args)), ...);
-  }
-
-  template <typename T>
-  T _getUserInput(const std::string &prompt, std::function<std::pair<bool, std::string>(const T &)> validate)
-  {
-    T value;
-    while (true)
-    {
-      try
-      {
-        _print(prompt);
-        std::cin >> value;
-
-        if (std::cin.fail())
-        {
-          throw std::invalid_argument("read input error");
-        }
-
-        auto [isValid, validationMsg] = validate(value);
-        if (!isValid)
-        {
-          throw std::invalid_argument(validationMsg);
-        }
-
-        break;
-      }
-      catch (const std::exception &e)
-      {
-        _print(e.what(), "\n");
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-      }
-    }
-    return value;
-  }
-
-  void _setPIM(PIM *pim)
-  {
-    _pim = pim;
-  }
-
-
-  PIM* _getPIM()
-  {
-    return _pim;
-  }
-
-  void _setDictionaryDescription(const std::string &description)
-  {
-    _dictionaryDescription = description;
-  }
-
-  void _setDictionaryTitle(const std::string &title)
-  {
-    _dictionaryTitle = title;
-  }
-
-  void _setDictionaryPrompt(const std::string &prompt)
-  {
-    _dictionaryPrompt = prompt;
-  }
-
-  std::string _getDictionaryTitle() const
-  {
-    return _dictionaryTitle;
-  }
-
-  std::string _getDictionaryPrompt() const
-  {
-    return _dictionaryPrompt;
-  }
-};
 
 class TerminalMenu : public TerminalOperation
 {
@@ -182,10 +150,10 @@ protected:
   void _showMenuOptions()
   {
     int optionsQuantity = _getOptionsQuantity();
-    _print("\n===== ", _getDictionaryTitle(), " =====\n");
+    _print("\n===== ", _dictionaryTitle, " =====\n");
     for (size_t i = 0; i < optionsQuantity; ++i)
     {
-      _print(i + 1, ". ", _menuOptions[i]->getDictionaryDescription(), "\n");
+      _print(i + 1, ". ", _menuOptions[i]->_dictionaryDescription, "\n");
     }
     _print(optionsQuantity + 1, ". Exit\n");
   }
@@ -193,7 +161,7 @@ protected:
   int _getUserInputOption()
   {
     return _getUserInput<int>(
-      _getDictionaryPrompt(),
+      _dictionaryPrompt,
       [this](const int &inputOption) -> std::pair<bool, std::string>
       {
         if (inputOption < 1 || inputOption > _getOptionsQuantity() + 1)
@@ -223,7 +191,7 @@ public:
   }
 };
 
-class FormProductAdd final : public TerminalOperation
+class FormProductAdd final : TerminalOperation
 {
 public:
   FormProductAdd(PIM* pim)
@@ -234,10 +202,9 @@ public:
   }
   void execute() override
   {
-    _print(_getDictionaryPrompt());
-    std::string name = _getNewProductName();
-    std::string description = _getNewProductDescription();
-    double price = _getNewProductPrice();
+    auto name = _getNewProductName();
+    auto description = _getNewProductDescription();
+    auto price = _getNewProductPrice();
     const ProductNew product(name, description, price);
     _pim->addProduct(product);
   }
@@ -287,43 +254,6 @@ private:
   }
 };
 
-// class FormProductEdit final : public TerminalOperation
-// {
-// public:
-//   FormProductEdit(PIM* pim)
-//   {
-//     _setPIM(pim);
-//     _setDictionaryDescription("Editar un producto");
-//     _setDictionaryPrompt("Ingrese el nombre del producto:");
-//   }
-//   void execute() override
-//   {
-//     _print(_getDictionaryPrompt());
-//     Product productToEdit = _getProductToEditByName();
-//     std::string description = _getNewProductDescription();
-//     double price = _getNewProductPrice();
-//     const ProductNew product(name, description, price);
-//     _pim->updateProduct(product);
-//   }
-
-// private:
-//   Product _getProductToEditByName()
-//   {
-//     return _getUserInput<Product>(
-//         "Ingrese el nombre del producto: ",
-//         [this](const Product &value)
-//         {
-//           bool isValid = !value.name.empty();
-//           Product product = this->_pim->getProductByName(value.name);
-//           if (!isValid)
-//           {
-//             return std::make_pair(isValid, "El nombre del producto no puede estar vacio.");
-//           }
-//           return std::make_pair(isValid, "");
-//         });
-//   }
-// };
-
 class App final : public TerminalMenu
 {
 public:
@@ -334,8 +264,6 @@ public:
     _setDictionaryPrompt("Elija una opcion: ");
     _setDictionaryExit("Saliendo...\n");
     _setDictionaryInvalidOption("Opcion invalida, por favor intentalo de nuevo.\n");
-
-    _setMenuOption<FormProductAdd>(FormProductAdd(pim));
     _setMenuOption<FormProductAdd>(FormProductAdd(pim));
   };
 };

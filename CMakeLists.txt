@@ -7,8 +7,9 @@ find_package(SQLite3 REQUIRED)
 
 add_executable(acme_pim
     main.cpp
-    src/store/database.cpp
+    src/database/database.cpp
     src/models/pim.cpp
+    src/View/terminal_operation.cpp
     # src/View/terminal.cpp
     # src/View/terminal_implementations.cpp
     # src/View/SubMenus/Search/Busqueda.h
