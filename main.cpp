@@ -264,12 +264,13 @@ public:
     _setDictionaryPrompt("Elija una opcion: ");
     _setDictionaryExit("Saliendo...\n");
     _setDictionaryInvalidOption("Opcion invalida, por favor intentalo de nuevo.\n");
-    _setMenuOption<FormProductAdd>(FormProductAdd(pim));
+    //_setMenuOption<FormProductAdd>(FormProductAdd(pim));
   };
 };
 
 int main()
 {
+  std::cout << "Hola, mundo!" << std::endl;
   PIM *pim = new PIM("pim.db");
   App app(pim);
   app.execute();

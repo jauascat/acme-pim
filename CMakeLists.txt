@@ -3,13 +3,18 @@ project(acme_pim)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(SQLite3 REQUIRED)
+include_directories("sqlite_libs")
+link_directories("sqlite_libs")
+
+
+#find_package(SQLite3 REQUIRED)
 
 add_executable(acme_pim
     main.cpp
     src/database/database.cpp
     src/models/pim.cpp
     src/View/terminal_operation.cpp
+    sqlite_libs/sqlite3.c
     # src/View/terminal.cpp
     # src/View/terminal_implementations.cpp
     # src/View/SubMenus/Search/Busqueda.h
@@ -24,4 +29,5 @@ add_executable(acme_pim
     # src/View/SubMenus/Variants/Variantes.h
 )
 
-target_link_libraries(acme_pim SQLite::SQLite3)
+# target_link_libraries(acme_pim SQLite:SQLite3)
+target_link_libraries(acme_pim sqlite3)
