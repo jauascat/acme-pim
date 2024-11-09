@@ -73,14 +73,14 @@ void products::Update::execute()
       bool isValid = !value.empty();
       if (!isValid)
       {
-        return std::make_pair(isValid, "El nombre del producto a editarno puede estar vacio.");
+        return std::make_pair(false, "El nombre del producto a editarno puede estar vacio.");
       }
       auto productToEdit = _pim->productGetByName(value);
       if(!productToEdit)
       {
-        return std::make_pair(isValid, "El producto no existe.");
+        return std::make_pair(false, "El producto no existe.");
       }
-      return std::make_pair(isValid, "");
+      return std::make_pair(true, "");
     });
 
   auto productToEdit = _pim->productGetByName(nameToEdit);
