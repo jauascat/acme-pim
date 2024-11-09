@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <functional>
 #include <iostream>
@@ -7,11 +8,11 @@
 
 #include "../models/pim.h"
 
-class TerminalOperation
+class Operation
 {
 public:
     virtual void execute() = 0;
-    virtual ~TerminalOperation() {}
+    virtual ~Operation() {}
     std::string _dictionaryDescription;
     std::string getDictionaryDescription();
 
@@ -19,12 +20,6 @@ protected:
     PIM *_pim = nullptr;
     std::string _dictionaryTitle;
     std::string _dictionaryPrompt;
-
-    // template <typename... Args>
-    // void _print(Args &&...args);
-
-    // template <typename T>
-    // T _getUserInput(const std::string &prompt, std::function<std::pair<bool, std::string>(const T &)> validate);
 
     template <typename... Args>
     void _print(Args &&...args) {

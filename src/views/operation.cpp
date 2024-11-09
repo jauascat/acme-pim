@@ -1,34 +1,34 @@
-#include "terminal_operation.h"
+#include "operation.h"
 
-std::string TerminalOperation::getDictionaryDescription() {
+std::string Operation::getDictionaryDescription() {
     return _dictionaryDescription;
 }
 
-void TerminalOperation::_setPIM(PIM *pim) {
+void Operation::_setPIM(PIM *pim) {
     _pim = pim;
 }
 
-PIM* TerminalOperation::_getPIM() {
+PIM* Operation::_getPIM() {
     return _pim;
 }
 
-void TerminalOperation::_setDictionaryDescription(const std::string &description) {
+void Operation::_setDictionaryDescription(const std::string &description) {
     _dictionaryDescription = description;
 }
 
-void TerminalOperation::_setDictionaryTitle(const std::string &title) {
+void Operation::_setDictionaryTitle(const std::string &title) {
     _dictionaryTitle = title;
 }
 
-void TerminalOperation::_setDictionaryPrompt(const std::string &prompt) {
+void Operation::_setDictionaryPrompt(const std::string &prompt) {
     _dictionaryPrompt = prompt;
 }
 
-std::string TerminalOperation::_getDictionaryTitle() {
+std::string Operation::_getDictionaryTitle() {
     return _dictionaryTitle;
 }
 
-std::string TerminalOperation::_getDictionaryPrompt() {
+std::string Operation::_getDictionaryPrompt() {
     return _dictionaryPrompt;
 }
 

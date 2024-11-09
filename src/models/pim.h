@@ -10,7 +10,7 @@ private:
   Database db;
 
 public:
-  PIM(const std::string& dbName);
+  PIM(const std::string& dbName = std::string("pim.db"));
 
   bool addProduct(const ProductNew& product);
   bool updateProduct(const ProductNew& product);
