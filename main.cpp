@@ -1,8 +1,9 @@
-#include "./src/View/terminal_implementations.h"
+#include "src/views/app.h"
 
 int main()
 {
-  auto app = GetAppInstance();
-  app.execute();
+  PIM *pim = new PIM();
+  App terminalApp(pim);
+  terminalApp.execute();
   return 0;
 }
