@@ -2,11 +2,13 @@
 
 #include <string>
 
-class Category {
+class Category
+{
 public:
-    int id;
-    std::string name;
-    std::string description;
+  int id;
+  std::string name;
+  std::string description;
 
-    Category(int id, const std::string& name, const std::string& description);
+  Category(int id, const std::string &name, const std::string &description)
+    : id(id), name(name), description(description) {}
 };
