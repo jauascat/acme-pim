@@ -36,27 +36,22 @@ void Menu::_showMenuOptions()
   _print(optionsQuantity + 1, ". Exit\n");
 }
 
-int Menu::_getUserInputOption()
-{
-  return _getUserInput<int>(
-    _dictionaryPrompt,
-    [this](const int &inputOption) -> std::pair<bool, std::string>
-    {
-      if (inputOption < 1 || inputOption > _getOptionsQuantity() + 1)
-      {
-        return std::make_pair(false, _getDictionaryInvalidOption());
-      }
-      return std::make_pair(true, std::string());
-    }
-  );
-}
-
 void Menu::execute()
 {
   while (true)
   {
     _showMenuOptions();
-    int selectedOption = _getUserInputOption();
+    int selectedOption = _getUserInput<int>(
+      _dictionaryPrompt,
+      [this](const int &inputOption) -> std::pair<bool, std::string>
+      {
+        if (inputOption < 1 || inputOption > _getOptionsQuantity() + 1)
+        {
+          return std::make_pair(false, _getDictionaryInvalidOption());
+        }
+        return std::make_pair(true, std::string());
+      }
+    );
 
     if (selectedOption == _getOptionsQuantity() + 1)
     {

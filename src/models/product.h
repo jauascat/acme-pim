@@ -18,3 +18,9 @@ public:
     ProductNew(const std::string& name, const std::string& description, double price)
       : Product(0, name, description, price) {}
 };
+
+class ProductEdited : public Product {
+public:
+    ProductEdited()
+      : Product(0, std::string(), std::string(), 0) {}
+};

@@ -37,7 +37,7 @@ bool Database::executeSQL(const std::string &sql)
   return true;
 }
 
-bool Database::addProduct(const ProductNew &product)
+bool Database::productInsert(const ProductNew &product)
 {
   std::string sql = "INSERT INTO Products (name, description, price) VALUES ('" +
                     product.name + "', '" + product.description + "', " +
@@ -45,7 +45,20 @@ bool Database::addProduct(const ProductNew &product)
   return executeSQL(sql);
 }
 
-bool Database::updateProduct(const ProductNew &product)
+std::optional<Product> Database::productGetByName(const std::string &name)
+{
+  std::string sql = "SELECT * FROM Products WHERE name = '" + name + "';";
+  std::vector<Product> query_results = executeQuery<Product>(sql, [](char **row) -> Product {
+    return Product(atoi(row[0]), std::string(row[1]), std::string(row[2]), atof(row[3]));
+  });
+  if(query_results.empty())
+  {
+    return std::nullopt;
+  }
+  return query_results[0];
+}
+
+bool Database::productUpdate(const ProductNew &product)
 {
   std::string sql = "UPDATE Products SET name = '" + product.name + "', description = '" +
                     product.description + "', price = " + std::to_string(product.price) +
@@ -53,27 +66,27 @@ bool Database::updateProduct(const ProductNew &product)
   return executeSQL(sql);
 }
 
-bool Database::deleteProduct(int productId)
+bool Database::productDelete(int productId)
 {
   std::string sql = "DELETE FROM Products WHERE id = " + std::to_string(productId) + ";";
   return executeSQL(sql);
 }
 
-bool Database::addCategory(const Category &category)
+bool Database::categoryInsert(const Category &category)
 {
   std::string sql = "INSERT INTO Categories (name, description) VALUES ('" +
                     category.name + "', '" + category.description + "');";
   return executeSQL(sql);
 }
 
-bool Database::updateCategory(const Category &category)
+bool Database::categoryUpdate(const Category &category)
 {
   std::string sql = "UPDATE Categories SET name = '" + category.name + "', description = '" +
                     category.description + "' WHERE id = " + std::to_string(category.id) + ";";
   return executeSQL(sql);
 }
 
-bool Database::deleteCategory(int categoryId)
+bool Database::categoryDelete(int categoryId)
 {
   std::string sql = "DELETE FROM Categories WHERE id = " + std::to_string(categoryId) + ";";
   return executeSQL(sql);
