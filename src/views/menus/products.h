@@ -2,6 +2,14 @@
 
 #include <string>
 #include <utility>
+#include <functional>
+#include <iostream>
+#include <limits>
+#include <stdexcept>
+#include <optional>
+#include <variant>
+#include <any>
+
 #include "../../views/operation.h"
 #include "../../views/menu.h"
 #include "../../models/pim.h"
@@ -13,10 +21,10 @@ namespace products
       Submenu(PIM *pim);
   };
 
-  class Add final : public Operation
+  class Create final : public Operation
   {
   public:
-    Add(PIM *pim);
+    Create(PIM *pim);
     void execute() override;
   };
 
@@ -24,6 +32,13 @@ namespace products
   {
   public:
     Update(PIM *pim);
+    void execute() override;
+  };
+
+  class Delete final : public Operation
+  {
+  public:
+    Delete(PIM *pim);
     void execute() override;
   };
 }

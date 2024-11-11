@@ -51,9 +51,9 @@ public:
   ~Database();
   void buildDB(const std::string &name);
 
-  bool productInsert(const ProductNew &product);
-  std::optional<Product> productGetByName(const std::string &name);
-  bool productUpdate(const ProductNew &product);
+  bool productInsert(const ProductNew& product);
+  std::optional<Product> productGetByName(const std::string& name);
+  bool productUpdate(const Product& product);
   bool productDelete(int productId);
 
   bool categoryInsert(const Category &category);

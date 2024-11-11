@@ -1,4 +1,5 @@
 #include "menu.h"
+#include <optional>
 
 void Menu::_setDictionaryInvalidOption(const std::string &invalidOptionMessage)
 {
@@ -41,23 +42,23 @@ void Menu::execute()
   while (true)
   {
     _showMenuOptions();
-    int selectedOption = _getUserInput<int>(
-      _dictionaryPrompt,
-      [this](const int &inputOption) -> std::pair<bool, std::string>
-      {
-        if (inputOption < 1 || inputOption > _getOptionsQuantity() + 1)
-        {
-          return std::make_pair(false, _getDictionaryInvalidOption());
-        }
-        return std::make_pair(true, std::string());
-      }
-    );
+    auto selectedOption = _GetUserInput<int, int>()
+      .withPrompt(_dictionaryPrompt)
+      .withValidator([this](const int &inputOption) { return std::make_pair(inputOption > 0 && inputOption <= _getOptionsQuantity() + 1, _getDictionaryInvalidOption()); })
+      .withExitHandler([]() { std::cout << "Operación cancelada.\n"; })
+      .withMapper([](const int &inputOption) { return inputOption; })
+      .execute();
+    
+    if (!selectedOption) {
+      break;
+    }
+    int option = selectedOption.value();
 
-    if (selectedOption == _getOptionsQuantity() + 1)
+    if (option == _getOptionsQuantity() + 1)
     {
       _print(_getDictionaryExit());
       break;
     }
-    _menuOptions[selectedOption - 1]->execute();
+    _menuOptions[*selectedOption - 1]->execute();
   }
 }
