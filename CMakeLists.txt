@@ -9,7 +9,6 @@ add_executable(acme_pim
     main.cpp
     src/database/database.cpp
     src/models/pim.cpp
-    src/models/product.cpp
     src/views/operation.cpp
     src/views/menu.cpp
     src/views/menus/products.cpp

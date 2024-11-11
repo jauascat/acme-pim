@@ -1,27 +1,29 @@
 #include "pim.h"
 
-PIM::PIM(const std::string& dbName) : db(dbName) {}
-
-bool PIM::addProduct(const ProductNew& product) {
-  return db.addProduct(product);
+bool PIM::productAdd(const ProductNew& product) {
+  return db.productInsert(product);
 }
 
-bool PIM::updateProduct(const ProductNew& product) {
-  return db.updateProduct(product);
+std::optional<Product> PIM::productGetByName(const std::string& name) {
+  return db.productGetByName(name);
 }
 
-bool PIM::deleteProduct(int productId) {
-  return db.deleteProduct(productId);
+bool PIM::productUpdate(const ProductNew& product) {
+  return db.productUpdate(product);
 }
 
-bool PIM::addCategory(const Category& category) {
-  return db.addCategory(category);
+bool PIM::productDelete(int productId) {
+  return db.productDelete(productId);
 }
 
-bool PIM::updateCategory(const Category& category) {
-  return db.updateCategory(category);
+bool PIM::categoryAdd(const Category& category) {
+  return db.categoryInsert(category);
 }
 
-bool PIM::deleteCategory(int categoryId) {
-  return db.deleteCategory(categoryId);
+bool PIM::categoryUpdate(const Category& category) {
+  return db.categoryUpdate(category);
+}
+
+bool PIM::categoryDelete(int categoryId) {
+  return db.categoryDelete(categoryId);
 }

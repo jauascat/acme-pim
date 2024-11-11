@@ -3,7 +3,7 @@
 int main()
 {
   PIM *pim = new PIM();
-  App terminalApp(pim);
-  terminalApp.execute();
+  App app(pim);
+  app.execute();
   return 0;
 }
