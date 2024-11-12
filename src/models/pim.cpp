@@ -1,6 +1,6 @@
 #include "pim.h"
 
-bool PIM::productAdd(const ProductNew& product) {
+bool PIM::productCreate(const ProductNew& product) {
   return db.productInsert(product);
 }
 
@@ -8,7 +8,7 @@ std::optional<Product> PIM::productGetByName(const std::string& name) {
   return db.productGetByName(name);
 }
 
-bool PIM::productUpdate(const ProductNew& product) {
+bool PIM::productUpdate(const Product& product) {
   return db.productUpdate(product);
 }
 

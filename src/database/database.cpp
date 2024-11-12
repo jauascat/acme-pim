@@ -58,7 +58,7 @@ std::optional<Product> Database::productGetByName(const std::string &name)
   return query_results[0];
 }
 
-bool Database::productUpdate(const ProductNew &product)
+bool Database::productUpdate(const Product &product)
 {
   std::string sql = "UPDATE Products SET name = '" + product.name + "', description = '" +
                     product.description + "', price = " + std::to_string(product.price) +
