@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(SQLite3 REQUIRED)
 
 add_executable(acme_pim
+    Nodo.cpp
+    LinkedList.cpp
     main.cpp
 )
 
