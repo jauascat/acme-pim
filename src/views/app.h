@@ -3,7 +3,8 @@
 #include "menu.h"
 #include "../models/pim.h"
 
-#include "menus/products.h"
+#include "menus/Products/products.h"
+#include "menus/Variants/variants.h"
 
 class App final : public Menu
 {
