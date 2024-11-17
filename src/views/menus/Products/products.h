@@ -10,9 +10,9 @@
 #include <variant>
 #include <any>
 
-#include "../../views/operation.h"
-#include "../../views/menu.h"
-#include "../../models/pim.h"
+#include "../../../views/operation.h"
+#include "../../../views/menu.h"
+#include "../../../models/pim.h"
 
 namespace products
 {

@@ -99,19 +99,23 @@ protected:
 
     std::optional<TOutput> execute()
     {
-      if(!_mapper) {
+      if (!_mapper)
+      {
         throw std::runtime_error("Mapper function is required.");
       }
+
       while (true)
       {
         try
         {
-          std::cout << _prompt << " (" << _exitClause << " para cancelar): ";
+          std::cout << _prompt << " (" << _exitClause << " para cancelar):\n";
           std::string input;
-          std::cin >> input;
+          std::getline(std::cin, input);
 
           if (std::cin.fail())
           {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             if (_parseFailureHandler)
               _parseFailureHandler();
             throw std::runtime_error(_parseFailureMessage);
@@ -137,7 +141,7 @@ protected:
         }
         catch (const std::runtime_error &e)
         {
-          std::cout << e.what() << "\n";
+          std::cout << e.what() << std::endl;
           std::cin.clear();
           std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
@@ -146,12 +150,14 @@ protected:
           if (_exceptionHandler)
             _exceptionHandler(e);
           else
-            std::cout << "Se produjo un error inesperado. Por favor, intente nuevamente.\n";
+            std::cout << "Se produjo un error inesperado. Por favor, intente nuevamente.\n" << std::endl;
           std::cin.clear();
           std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
       }
     }
+
+
 
   private:
     std::string _prompt;

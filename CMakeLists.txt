@@ -11,18 +11,13 @@ add_executable(acme_pim
     src/models/pim.cpp
     src/views/operation.cpp
     src/views/menu.cpp
-    src/views/menus/products.cpp
+        src/views/menus/Products/products.cpp
     src/views/app.cpp
-    # src/views/SubMenus/Search/Busqueda.h
-    # src/views/SubMenus/Search/Busqueda.cpp
-    # src/views/SubMenus/Products/Productos.cpp
-    # src/views/SubMenus/Products/Productos.h
-    # src/views/SubMenus/Category/Categorias.cpp
-    # src/views/SubMenus/Category/Categorias.h
-    # src/views/SubMenus/Attributes/Atributos.cpp
-    # src/views/SubMenus/Attributes/Atributos.h
-    # src/views/SubMenus/Variants/Variantes.cpp
-    # src/views/SubMenus/Variants/Variantes.h
+    src/models/variant.h
+        src/views/menus/Variants/variants.cpp
+        src/views/menus/Variants/variants.h
+        src/views/menus/Categories/categories.cpp
+        src/views/menus/Categories/categories.h
 )
 
 target_link_libraries(acme_pim SQLite::SQLite3)
