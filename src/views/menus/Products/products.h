@@ -21,6 +21,41 @@ namespace products
       Submenu(PIM *pim);
   };
 
+  class GetAll final : public Operation
+  {
+  public:
+    GetAll(PIM *pim);
+    void execute() override;
+  };
+
+  class GetByName final : public Operation
+  {
+  public:
+    GetByName(PIM *pim);
+    void execute() override;
+  };
+
+  class GetById final : public Operation
+  {
+  public:
+    GetById(PIM *pim);
+    void execute() override;
+  };
+
+  class GetByCategory final : public Operation
+  {
+  public:
+    GetByCategory(PIM *pim);
+    void execute() override;
+  };
+
+  class GetByPriceRange final : public Operation
+  {
+  public:
+    GetByPriceRange(PIM *pim);
+    void execute() override;
+  };
+
   class Create final : public Operation
   {
   public:

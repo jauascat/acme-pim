@@ -16,15 +16,20 @@ public:
       : db(dbName) {}
 
   // Product CRUD
-  bool productCreate(const ProductNew &product);
+  bool productCreate(const ProductNew &product, int categoryId);
   std::optional<Product> productGetByName(const std::string &name);
   std::optional<Product> productGetById(int productId);
+  std::vector<Product> productGetAll();
+  std::vector<Product> productGetByCategory(std:: string category);
+  std::vector<Product> productGetByPriceRange(double firstRange, double lastRange);
   bool productUpdate(const Product &product);
   bool productDelete(int productId);
 
   // Category CRUD
   bool categoryCreate(const Category &category);
   std::optional<Category> categoryGetById(int categoryId);
+    std::optional<Category> categoryGetByProductId(int productId);
+  std::vector<Category> categoryGetAll();
   bool categoryUpdate(const Category &category);
   bool categoryDelete(int categoryId);
   bool categoryHasProducts(int categoryId);

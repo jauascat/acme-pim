@@ -39,17 +39,33 @@ bool Database::executeSQL(const std::string &sql)
 
 // PRODUCTS
 
-bool Database::productInsert(const ProductNew &product)
+bool Database::productInsert(const ProductNew &product, int categoryId)
 {
   std::string sql = "INSERT INTO Products (name, description, price) VALUES ('" +
                     product.name + "', '" + product.description + "', " +
                     std::to_string(product.price) + ");";
-  return executeSQL(sql);
+
+  if (!executeSQL(sql)) {
+    return false;
+  }
+
+  int productId = getLastInsertedRowId();
+
+  if(categoryId > 0) {
+    std::string sqlCategory = "INSERT INTO ProductCategories (product_id, category_id) VALUES (" +
+                               std::to_string(productId) + ", " + std::to_string(categoryId) + ");";
+
+    if (!executeSQL(sqlCategory)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 std::optional<Product> Database::productGetByName(const std::string &name)
 {
-  std::string sql = "SELECT * FROM Products WHERE name = '" + name + "';";
+  std::string sql = "SELECT * FROM Products WHERE name like '" + name + "';";
   std::vector<Product> query_results = executeQuery<Product>(sql, [](char **row) -> Product {
     return Product(atoi(row[0]), std::string(row[1]), std::string(row[2]), atof(row[3]));
   });
@@ -72,6 +88,41 @@ std::optional<Product> Database::productGetById(int productId)
     return std::nullopt;
   }
   return query_results[0];
+}
+
+std::vector<Product> Database::productGetByCategory(std::string category)
+{
+  std::string sql = "SELECT * FROM Products p "
+                  "INNER JOIN ProductCategories cp ON (cp.product_id = p.id) "
+                  "INNER JOIN Categories c ON (c.id = cp.category_id) "
+                  "WHERE c.name LIKE '%" + category + "%';";
+  auto query_results = executeQuery<Product>(sql, [](char **row) -> Product {
+    return Product(atoi(row[0]), std::string(row[1]), std::string(row[2]), atof(row[3]));
+  });
+
+  return query_results;
+}
+
+std::vector<Product> Database::productGetByPriceRange(double firstRange, double lastRange)
+{
+  std::string sql = "SELECT * FROM Products WHERE price BETWEEN " +
+                    std::to_string(firstRange) + " AND " + std::to_string(lastRange) + ";";
+
+  auto query_results = executeQuery<Product>(sql, [](char **row) -> Product {
+    return Product(atoi(row[0]), std::string(row[1]), std::string(row[2]), atof(row[3]));
+  });
+
+  return query_results;
+}
+
+std::vector<Product> Database::productGetAll()
+{
+  std::string sql = "SELECT * FROM Products;";
+  auto query_results = executeQuery<Product>(sql, [](char **row) -> Product {
+    return Product(atoi(row[0]), std::string(row[1]), std::string(row[2]), atof(row[3]));
+  });
+
+  return query_results;
 }
 
 bool Database::productUpdate(const Product &product)
@@ -106,6 +157,29 @@ std::optional<Category> Database::categoryGetById(int categoryId) {
     return std::nullopt;
   }
   return query_results[0];
+}
+
+std::optional<Category> Database::categoryGetByProductId(int productId) {
+  std::string sql = "SELECT * FROM Categories c "
+                  "INNER JOIN ProductCategories cp ON (cp.category_id = c.id) "
+                  "WHERE cp.product_id = " + std::to_string(productId) + ";";
+  auto query_results = executeQuery<Category>(sql, [](char **row) -> Category {
+      return Category(atoi(row[0]), std::string(row[1]), std::string(row[2]));
+  });
+
+  if (query_results.empty()) {
+    return std::nullopt;
+  }
+  return query_results[0];
+}
+
+std::vector<Category> Database::categoryGetAll() {
+  std::string sql = "SELECT * FROM Categories;";
+  auto query_results = executeQuery<Category>(sql, [](char **row) -> Category {
+      return Category(atoi(row[0]), std::string(row[1]), std::string(row[2]));
+  });
+
+  return query_results;
 }
 
 bool Database::categoryUpdate(const Category &category) {
@@ -299,4 +373,20 @@ void Database::buildDB(const std::string &name)
       FOREIGN KEY (variant_id) REFERENCES Variants(id) ON DELETE CASCADE
     );
   )");
+}
+
+int Database::getLastInsertedRowId() {
+  sqlite3_stmt* stmt;
+  int id = 0;
+  const char* sql = "SELECT last_insert_rowid();";
+
+  if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+      id = sqlite3_column_int(stmt, 0);
+    }
+  } else {
+    std::cerr << "Error en la preparación del SQL: " << sqlite3_errmsg(db) << std::endl;
+  }
+  sqlite3_finalize(stmt);
+  return id;
 }
