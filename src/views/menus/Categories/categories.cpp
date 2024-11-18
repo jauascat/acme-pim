@@ -4,9 +4,36 @@
 categories::Submenu::Submenu(PIM *pim) {
     _setPIM(pim);
     _setDictionaryDescription("Gestionar Categorias");
+    _setMenuOption<categories::GetAll>(categories::GetAll(pim));
     _setMenuOption<Create>(Create(pim));
     _setMenuOption<Update>(Update(pim));
     _setMenuOption<Delete>(Delete(pim));
+}
+
+categories::GetAll::GetAll(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Listar todas las categorias");
+}
+
+void categories::GetAll::execute()
+{
+    auto categoriesList = _pim->categoryGetAll();
+
+    if (categoriesList.empty()) {
+        std::cout << "No hay categorias para mostrar.\n";
+        return;
+    }
+
+    std::cout << "Lista de categorias y sus productos:\n";
+    for (const auto& category : categoriesList) {
+        auto productByCategory = _pim->productGetByCategory(category.getName());
+
+        std::cout << "Id: " << category.getId() << "\n"
+                  << "Nombre: " << category.getName() << "\n"
+                  << "Descripcion: " << category.getDescription() << "\n"
+                  << "Productos: " << productByCategory.size() << "\n\n";
+    }
 }
 
 categories::Create::Create(PIM *pim) {

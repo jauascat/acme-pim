@@ -1,8 +1,8 @@
 #include "pim.h"
 
 // Product CRUD
-bool PIM::productCreate(const ProductNew &product) {
-  return db.productInsert(product);
+bool PIM::productCreate(const ProductNew &product, int categoryId) {
+  return db.productInsert(product, categoryId);
 }
 
 std::optional<Product> PIM::productGetByName(const std::string &name) {
@@ -11,6 +11,18 @@ std::optional<Product> PIM::productGetByName(const std::string &name) {
 
 std::optional<Product> PIM::productGetById(int productId) {
   return db.productGetById(productId);
+}
+
+std::vector<Product> PIM::productGetByCategory(std::string category) {
+  return db.productGetByCategory(category);
+}
+
+std::vector<Product> PIM::productGetByPriceRange(double firstRange, double lastRange) {
+  return db.productGetByPriceRange(firstRange, lastRange);
+}
+
+std::vector<Product> PIM::productGetAll() {
+  return db.productGetAll();
 }
 
 bool PIM::productUpdate(const Product &product) {
@@ -28,6 +40,14 @@ bool PIM::categoryCreate(const Category &category) {
 
 std::optional<Category> PIM::categoryGetById(int categoryId) {
   return db.categoryGetById(categoryId);
+}
+
+std::optional<Category> PIM::categoryGetByProductId(const int productId) {
+  return db.categoryGetByProductId(productId);
+}
+
+std::vector<Category> PIM::categoryGetAll() {
+  return db.categoryGetAll();
 }
 
 bool PIM::categoryUpdate(const Category &category) {
