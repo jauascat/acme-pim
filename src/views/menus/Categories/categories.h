@@ -10,6 +10,13 @@ namespace categories {
         Submenu(PIM* pim);
     };
 
+    class GetAll final : public Operation
+    {
+    public:
+        GetAll(PIM *pim);
+        void execute() override;
+    };
+
     class Create final : public Operation {
     public:
         Create(PIM* pim);

@@ -10,8 +10,240 @@ products::Submenu::Submenu(PIM *pim)
 {
   _setPIM(pim);
   _setDictionaryDescription("Gestionar Productos");
+  _setMenuOption<products::GetAll>(products::GetAll(pim));
+  _setMenuOption<products::GetByName>(products::GetByName(pim));
+  _setMenuOption<products::GetById>(products::GetById(pim));
+  _setMenuOption<products::GetByCategory>(products::GetByCategory(pim));
+  _setMenuOption<products::GetByPriceRange>(products::GetByPriceRange(pim));
   _setMenuOption<products::Create>(products::Create(pim));
   _setMenuOption<products::Update>(products::Update(pim));
+}
+
+products::GetAll::GetAll(PIM *pim)
+{
+  _setPIM(pim);
+  _setDictionaryDescription("Listar todos los productos");
+}
+
+void products::GetAll::execute()
+{
+    auto productsList = _pim->productGetAll();
+
+    if (productsList.empty()) {
+        std::cout << "No hay productos para mostrar.\n";
+        return;
+    }
+
+    std::cout << "Lista de productos:\n";
+    for (const auto& product : productsList) {
+        auto productCategory = _pim->categoryGetByProductId(int(product.getId()));
+
+        std::cout << "Id: " << product.getId() << "\n"
+                  << "Nombre: " << product.getName() << "\n"
+                  << "Descripcion: " << product.getDescription() << "\n"
+                  << "Precio: $" << product.getPrice() << "\n";
+
+        if (productCategory) {
+            std::cout << "Categoria: " << productCategory->getName() << "\n\n";
+        } else {
+            std::cout << "Categoria: No tiene categoria asignada\n\n";
+        }
+    }
+}
+
+products::GetByName::GetByName(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Buscar por nombre");
+}
+
+void products::GetByName::execute()
+{
+    auto nameInput = _GetUserInput<std::string, std::string>()
+    .withPrompt("Ingrese el nombre del producto: ")
+    .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "El nombre del producto no puede estar vacio."); })
+    .withExceptionHandler([](const std::exception &e){ std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n"; })
+    .withParseFailureMessage("El formato del nombre no es valido.")
+    .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
+    .withMapper([](const std::string &input) { return input; })
+    .execute();
+
+    if (!nameInput)
+    {
+        return;
+    }
+    auto name = nameInput.value();
+
+    auto productOpt = _pim->productGetByName(name);
+
+    if (productOpt) {
+        const Product& product = productOpt.value();
+        auto productCategory = _pim->categoryGetByProductId(int(product.getId()));
+
+        std::cout << "Id: " << product.getId() << "\n"
+                  << "Nombre: " << product.getName() << "\n"
+                  << "Descripcion: " << product.getDescription() << "\n"
+                  << "Precio: $" << product.getPrice() << "\n";
+
+        if (productCategory) {
+            std::cout << "Categoria: " << productCategory->getName() << "\n\n";
+        } else {
+            std::cout << "Categoria: No tiene categoria asignada\n\n";
+        }
+    } else {
+        std::cout << "No se encontró el producto.\n";
+    }
+}
+
+products::GetById::GetById(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Buscar por id (SKU)");
+}
+
+void products::GetById::execute()
+{
+    auto productIdInput = _GetUserInput<int, int>()
+      .withPrompt("Ingrese el id (SKU) del producto: ")
+      .withExceptionHandler([](const std::exception &e) {
+          std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero válido.\n";
+      })
+      .withParseFailureMessage("El id debe ser un número válido.")
+      .withParseFailureHandler([]() {
+          std::cout << "Por favor ingrese un número (ejemplo: 1)\n";
+      })
+      .withExitHandler([]() {
+          std::cout << "Operación cancelada.\n";
+      })
+      .withMapper([&](const int &input) { return input; })
+      .execute();
+
+    if (!productIdInput)
+    {
+        return;
+    }
+    auto productId = productIdInput.value();
+    auto productOpt = _pim->productGetById(productId);
+
+    if (productOpt) {
+        const Product& product = productOpt.value();
+        auto productCategory = _pim->categoryGetByProductId(int(product.getId()));
+
+        std::cout << "Id: " << product.getId() << "\n"
+                  << "Nombre: " << product.getName() << "\n"
+                  << "Descripcion: " << product.getDescription() << "\n"
+                  << "Precio: $" << product.getPrice() << "\n";
+
+        if (productCategory) {
+            std::cout << "Categoria: " << productCategory->getName() << "\n\n";
+        } else {
+            std::cout << "Categoria: No tiene categoria asignada\n\n";
+        }
+    } else {
+        std::cout << "No se encontró el producto.\n";
+    }
+}
+
+products::GetByCategory::GetByCategory(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Buscar por categoria");
+}
+
+void products::GetByCategory::execute()
+{
+    auto categoryInput = _GetUserInput<std::string, std::string>()
+    .withPrompt("Ingrese el nombre de la categoria: ")
+    .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "El nombre del producto no puede estar vacio."); })
+    .withExceptionHandler([](const std::exception &e){ std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n"; })
+    .withParseFailureMessage("El formato del nombre no es valido.")
+    .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
+    .withMapper([](const std::string &input) { return input; })
+    .execute();
+
+    if (!categoryInput)
+    {
+        return;
+    }
+    auto category = categoryInput.value();
+
+    auto productsList = _pim->productGetByCategory(category);
+
+    if (productsList.empty()) {
+        std::cout << "No hay productos para mostrar.\n";
+        return;
+    }
+
+    std::cout << "Lista de productos:\n";
+    for (const auto& product : productsList) {
+        std::cout << "Id: " << product.getId() << "\n"
+                  << "Nombre: " << product.getName() << "\n"
+                  << "Descripcion: " << product.getDescription() << "\n"
+                  << "Precio: $" << product.getPrice() << "\n"
+                  << "Categoria: " << category << "\n\n";;
+    }
+}
+
+products::GetByPriceRange::GetByPriceRange(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Buscar por rango de precio");
+}
+
+void products::GetByPriceRange::execute()
+{
+    auto priceFirstInput = _GetUserInput<double, double>()
+      .withPrompt("Ingrese el precio mas bajo para el producto: ")
+      .withExceptionHandler([](const std::exception &e) {
+          std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero válido.\n";
+      })
+      .withParseFailureMessage("El precio debe ser un número válido.")
+      .withParseFailureHandler([]() {
+          std::cout << "Por favor ingrese un número (ejemplo: 1.0 o 1)\n";
+      })
+      .withExitHandler([]() {
+          std::cout << "Operación cancelada.\n";
+      })
+      .withMapper([&](const double &input) { return input; })
+      .execute();
+
+    auto priceSecondInput = _GetUserInput<double, double>()
+      .withPrompt("Ingrese el precio mas bajo para el producto: ")
+      .withExceptionHandler([](const std::exception &e) {
+          std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero válido.\n";
+      })
+      .withParseFailureMessage("El precio debe ser un número válido.")
+      .withParseFailureHandler([]() {
+          std::cout << "Por favor ingrese un número (ejemplo: 1.0 o 1)\n";
+      })
+      .withExitHandler([]() {
+          std::cout << "Operación cancelada.\n";
+      })
+      .withMapper([&](const double &input) { return input; })
+      .execute();
+
+    auto productsList = _pim->productGetByPriceRange(priceFirstInput.value(), priceSecondInput.value());
+
+    if (productsList.empty()) {
+        std::cout << "No hay productos para mostrar.\n";
+        return;
+    }
+
+    std::cout << "Lista de productos:\n";
+    for (const auto& product : productsList) {
+        auto productCategory = _pim->categoryGetByProductId(int(product.getId()));
+
+        std::cout << "Id: " << product.getId() << "\n"
+                  << "Nombre: " << product.getName() << "\n"
+                  << "Descripcion: " << product.getDescription() << "\n"
+                  << "Precio: $" << product.getPrice() << "\n";
+
+        if (productCategory) {
+            std::cout << "Categoria: " << productCategory->getName() << "\n\n";
+        } else {
+            std::cout << "Categoria: No tiene categoria asignada\n\n";
+        }
+    }
 }
 
 products::Create::Create(PIM *pim)
@@ -68,8 +300,49 @@ void products::Create::execute()
   }
   double price = static_cast<double>(priceInput.value());
 
+  //Mostrar categorias disponibles al usuario
+  auto categoriesList = _pim->categoryGetAll();
+
+  if(categoriesList.empty()) {
+      std::cout << "No hay categorias\n";
+      return;
+  }
+
+  std::cout << "Seleccione una categoria para el producto:\n";
+  int counter = 1;
+  for (const auto &category : categoriesList) {
+      std::cout << counter++ << ". " << category.getName() << "\n";
+  }
+
+  auto categoryInput = _GetUserInput<int, int>()
+      .withPrompt("Seleccione una categoria para el producto: ")
+      .withValidator([&](const int &value) {
+          return std::make_pair(value > 0 && value <= categoriesList.size(), "Seleccione una categoria válida.");
+      })
+      .withExceptionHandler([](const std::exception &e) {
+          std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero válido.\n";
+      })
+      .withParseFailureMessage("El id debe ser un número válido.")
+      .withParseFailureHandler([]() {
+          std::cout << "Por favor ingrese un número (ejemplo: 1)\n";
+      })
+      .withExitHandler([]() {
+          std::cout << "Operación cancelada.\n";
+      })
+      .withMapper([&](const int &input) { return input; })
+      .execute();
+
+  if (!categoryInput)
+  {
+      std::cout << "Operación cancelada.\n";
+      return;
+  }
+
+  int selectedCategoryIndex = categoryInput.value() - 1;
+  const Category& selectedCategory = categoriesList[selectedCategoryIndex];
+
   const ProductNew product(name, description, price);
-  _pim->productCreate(product);
+  _pim->productCreate(product, selectedCategory.getId());
 }
 
 products::Update::Update(PIM *pim)
