@@ -46,11 +46,12 @@ public:
     ~Database();
     void buildDB(const std::string &name);
 
-    bool productInsert(const ProductNew &product, int categoryId);
+    bool productInsert(const ProductNew &product, int categoryId, const std::vector<Variant>& variants);
     std::optional<Product> productGetByName(const std::string &name);
     std::optional<Product> productGetById(int productId);
     std::vector<Product> productGetAll();
     std::vector<Product> productGetByCategory(std::string category);
+    std::vector<Product> productGetByVariant(const std::string & string);
     std::vector<Product> productGetByPriceRange(double firstRange, double lastRange);
     bool productUpdate(const Product &product);
     bool productDelete(int productId);
@@ -67,6 +68,7 @@ public:
     bool variantInsert(const Variant &variant);
     std::vector<Variant> getVariantsByProductId(int productId);
     std::optional<Variant> getVariantById(int variantId);
+    std::vector<Variant> variantGetAll();
     bool variantUpdate(const Variant &variant);
     bool variantDelete(int variantId);
 };

@@ -5,9 +5,41 @@ variants::Submenu::Submenu(PIM *pim)
 {
     _setPIM(pim);
     _setDictionaryDescription("Gestionar Variantes");
+    _setMenuOption<GetAll>(GetAll(pim));
     _setMenuOption<Create>(Create(pim));
     _setMenuOption<Update>(Update(pim));
     _setMenuOption<Delete>(Delete(pim));
+}
+
+variants::GetAll::GetAll(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Listar todas las variantes");
+}
+
+void variants::GetAll::execute()
+{
+    auto variantsList = _pim->variantGetAll();
+
+    if (variantsList.empty())
+    {
+        std::cout << "No hay variantes para mostrar.\n";
+        return;
+    }
+
+    std::cout << "Lista de Variantes:\n";
+    for (const auto &variant : variantsList)
+    {
+        std::cout << "ID de la Variante: " << variant.id << "\n"
+                  << "ID del Producto Asociado: " << variant.productId << "\n"
+                  << "Atributos:\n";
+
+        for (const auto &[key, value] : variant.attributes)
+        {
+            std::cout << "  " << key << ": " << value << "\n";
+        }
+        std::cout << "--------------------------\n";
+    }
 }
 
 variants::Create::Create(PIM *pim)

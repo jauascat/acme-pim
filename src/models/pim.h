@@ -16,11 +16,12 @@ public:
       : db(dbName) {}
 
   // Product CRUD
-  bool productCreate(const ProductNew &product, int categoryId);
+  bool productCreate(const ProductNew &product, int categoryId, const std::vector<Variant>& variants);
   std::optional<Product> productGetByName(const std::string &name);
   std::optional<Product> productGetById(int productId);
   std::vector<Product> productGetAll();
   std::vector<Product> productGetByCategory(std:: string category);
+  std::vector<Product> productGetByVariant(std:: string variant);
   std::vector<Product> productGetByPriceRange(double firstRange, double lastRange);
   bool productUpdate(const Product &product);
   bool productDelete(int productId);
@@ -28,7 +29,7 @@ public:
   // Category CRUD
   bool categoryCreate(const Category &category);
   std::optional<Category> categoryGetById(int categoryId);
-    std::optional<Category> categoryGetByProductId(int productId);
+  std::optional<Category> categoryGetByProductId(int productId);
   std::vector<Category> categoryGetAll();
   bool categoryUpdate(const Category &category);
   bool categoryDelete(int categoryId);
@@ -38,6 +39,7 @@ public:
   // Variant CRUD
   std::vector<Variant> getVariantsByProductId(int productId);
   std::optional<Variant> getVariantById(int variantId);
+  std::vector<Variant> variantGetAll();
   bool addVariant(const Variant &variant);
   bool updateVariant(const Variant &variant);
   bool deleteVariant(int variantId);

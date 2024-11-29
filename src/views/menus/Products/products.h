@@ -49,6 +49,13 @@ namespace products
     void execute() override;
   };
 
+  class GetByVariant final : public Operation
+  {
+  public:
+    GetByVariant(PIM *pim);
+    void execute() override;
+  };
+
   class GetByPriceRange final : public Operation
   {
   public:
