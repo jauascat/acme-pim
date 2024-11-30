@@ -26,9 +26,9 @@ graph TD
     ADT --> DB
 ```
 ## Commnad-line classes
-All command line operations are simple classes that extend either Operation or Menu.
+All command line operations are simple classes that extend either `Operation` or `Menu`.
 All child classes implement main polymorphic `execute()` function to compose Operations within themselves.
-All `execute()` implementations are simply concrete implementations of _GetUserInput.
+All `execute()` implementations are simply concrete implementations of `_GetUserInput` inner class.
 ```mermaid
 classDiagram
     class Operation {
@@ -101,9 +101,10 @@ void products::Update::execute()
         })
         .execute();
 ```
-### Overview:
-## Architecture Overview of Acme PIM 🚀
-
+### Command line classes implementation overview:
+All command line operations are simple classes that extend either `Operation` or `Menu`.
+Each `Operation` implementation calls a different operation upon the P.I.M class.
+![UI overview](https://github.com/jauascat/acme-pim/blob/MES_READ/scrap/ui_overview.png)
 
 ## Main dependencies:
   - C++ 17
