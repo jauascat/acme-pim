@@ -2,9 +2,10 @@
 
 Showcasing a variety of OOP-wise design patterns, this repository is an academic exercise demonstrating a simple implementation of a product information management system (PIM).
 It presents the C++ 17 code files for a command-line application that manages a database of products and categories. 
+The language of the implementation is Spanish.
 
 ## Core functionalities:
-- **A modular library for terminal-based user interfaces**
+- **A modular class hierarchy for terminal-based user interfaces** 
 - **Database in SQLite**
 - **An Abstract Data Type (ADT) class for**
   - *Product Management and Persistence*
@@ -14,7 +15,7 @@ It presents the C++ 17 code files for a command-line application that manages a 
   - **Custom Attributes and Variants**
     - Flexible definition of product attributes (e.g., color, size) and management of product variants.
 
-## Layer overview
+## Layers overview
 ```mermaid
 graph TD
     CLI["Command-line Application"]
@@ -23,6 +24,82 @@ graph TD
 
     CLI --> ADT
     ADT --> DB
+```
+## Commnad-line classes
+All command line operations are simple classes that extend either Operation or Menu.
+All child classes implement main polymorphic `execute()` function to compose Operations within themselves.
+All `execute()` implementations are simply concrete implementations of _GetUserInput.
+```mermaid
+classDiagram
+    class Operation {
+        execute()
+        getDictionaryDescription()
+        setPIM(pim)
+        getPIM()
+        setDictionaryDescription(description)
+        setDictionaryTitle(title)
+        setDictionaryPrompt(prompt)
+        getDictionaryTitle()
+        getDictionaryPrompt()
+        _print(args)
+    }
+
+    class Menu {
+        execute()
+        _setDictionaryInvalidOption(invalidOptionMessage)
+        _setDictionaryExit(exitMessage)
+        _getDictionaryInvalidOption()
+        _getDictionaryExit()
+        _getOptionsQuantity()
+        _setMenuOption(operation)
+        _showMenuOptions()
+        _getUserInputOption()
+    }
+
+    class _GetUserInput {
+        withPrompt(prompt)
+        withParseFailureMessage(message)
+        withValidator(validator)
+        withExitClause(exitClause)
+        withExitHandler(handler)
+        withParseFailureHandler(handler)
+        withExceptionHandler(handler)
+        withMapper(mapper)
+        withCastInput(caster)
+        execute()
+    }
+
+
+    %% Relationships
+    Operation <|-- Menu : inherits
+    Menu o-- Operation : contains
+    Operation o-- _GetUserInput : contains
+
+```
+An example of a concrete implementation of this hierarchy:
+```
+void products::Update::execute()
+{
+    auto productResult = _GetUserInput<std::string, Product>()
+        .withPrompt("Ingrese el nombre del producto para editar: ")
+        .withValidator([this](const std::string &value) {
+            auto product = _pim->productGetByName(value);
+            if (!product) {
+                return std::make_pair(false, "El producto no existe en el sistema.");
+            }
+            return std::make_pair(true, "");
+        })
+        .withMapper([this](const std::string &value) -> Product {
+            auto product = _pim->productGetByName(value);
+            if (!product) {
+                throw std::runtime_error("El producto no existe en el sistema.");
+            }
+            return product.value();
+        })
+        .withExceptionHandler([](const std::exception &e) {
+            std::cout << "Error al procesar el nombre del producto: " << e.what() << "\n";
+        })
+        .execute();
 ```
 ### Overview:
 ## Architecture Overview of Acme PIM 🚀
