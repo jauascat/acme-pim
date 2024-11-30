@@ -1,4 +1,5 @@
 #include "database.h"
+#include <algorithm>
 
 Database::Database(const std::string &dbName)
 {
@@ -39,23 +40,28 @@ bool Database::executeSQL(const std::string &sql)
 
 // PRODUCTS
 
-bool Database::productInsert(const ProductNew &product, int categoryId)
+bool Database::productInsert(const ProductNew &product, int categoryId, const std::vector<Variant>& variants)
 {
-  std::string sql = "INSERT INTO Products (name, description, price) VALUES ('" +
-                    product.name + "', '" + product.description + "', " +
-                    std::to_string(product.price) + ");";
+  const std::string sql = "INSERT INTO Products (name, description, price) VALUES ('" +
+                          product.name + "', '" + product.description + "', " +
+                          std::to_string(product.price) + ");";
 
   if (!executeSQL(sql)) {
     return false;
   }
 
-  int productId = getLastInsertedRowId();
+  const int productId = getLastInsertedRowId();
 
   if(categoryId > 0) {
-    std::string sqlCategory = "INSERT INTO ProductCategories (product_id, category_id) VALUES (" +
-                               std::to_string(productId) + ", " + std::to_string(categoryId) + ");";
+    const std::string sqlCategory = "INSERT INTO ProductCategories (product_id, category_id) VALUES (" +
+                                    std::to_string(productId) + ", " + std::to_string(categoryId) + ");";
 
     if (!executeSQL(sqlCategory)) {
+      return false;
+    }
+  }
+  for (const auto& variant : variants) {
+    if (!variantInsert(Variant(0, productId, variant.attributes))) {
       return false;
     }
   }
@@ -103,6 +109,22 @@ std::vector<Product> Database::productGetByCategory(std::string category)
   return query_results;
 }
 
+std::vector<Product> Database::productGetByVariant(const std::string &variantKey)
+{
+  std::string sql =
+      "SELECT DISTINCT p.id, p.name, p.description, p.price "
+      "FROM Products p "
+      "INNER JOIN Variants v ON v.product_id = p.id "
+      "INNER JOIN VariantAttributes va ON va.variant_id = v.id "
+      "WHERE va.key LIKE '%" + variantKey + "%';";
+
+  auto query_results = executeQuery<Product>(sql, [](char **row) -> Product {
+      return Product(atoi(row[0]), std::string(row[1]), std::string(row[2]), atof(row[3]));
+  });
+
+  return query_results;
+}
+
 std::vector<Product> Database::productGetByPriceRange(double firstRange, double lastRange)
 {
   std::string sql = "SELECT * FROM Products WHERE price BETWEEN " +
@@ -135,6 +157,12 @@ bool Database::productUpdate(const Product &product)
 
 bool Database::productDelete(int productId)
 {
+  auto variants = getVariantsByProductId(productId);
+  for (const auto& variant : variants) {
+    if (!variantDelete(variant.id)) {
+      return false;
+    }
+  }
   std::string sql = "DELETE FROM Products WHERE id = " + std::to_string(productId) + ";";
   return executeSQL(sql);
 }
@@ -211,15 +239,12 @@ bool Database::categoryRemoveProducts(int categoryId) {
 
 bool Database::variantInsert(const Variant &variant)
 {
-  // Insertar la variante en la tabla Variants
   std::string sql = "INSERT INTO Variants (product_id) VALUES (" + std::to_string(variant.productId) + ");";
   if (!executeSQL(sql))
     return false;
 
-  // Obtener el ID de la variante recién insertada
   int variantId = sqlite3_last_insert_rowid(db);
 
-  // Insertar cada atributo y su valor como una sola cadena en la tabla VariantAttributes
   for (const auto &[key, value] : variant.attributes)
   {
     std::string attrSQL = "INSERT INTO VariantAttributes (variant_id, key, value) VALUES (" +
@@ -246,14 +271,12 @@ std::vector<Variant> Database::getVariantsByProductId(int productId)
       return std::make_pair(std::string(row[0]), std::string(row[1])); // Mapper para los atributos
     });
 
-    // Crear un mapa con los atributos como strings
     std::map<std::string, std::string> attributesMap;
     for (const auto &attribute : attributes)
     {
       attributesMap[attribute.first] = attribute.second;
     }
 
-    // Crear la variante y añadirla al vector
     variants.emplace_back(variantId, productId, attributesMap);
   }
 
@@ -288,6 +311,34 @@ std::optional<Variant> Database::getVariantById(int variantId)
   }
 
   return Variant(variantId, productId, attributesMap);
+}
+
+std::vector<Variant> Database::variantGetAll()
+{
+  std::string sql = "SELECT id, product_id FROM Variants;";
+  auto variantData = executeQuery<std::pair<int, int>>(sql, [](char **row) {
+      return std::make_pair(atoi(row[0]), atoi(row[1])); // Mapeo: id y product_id
+  });
+
+  std::vector<Variant> variants;
+
+  for (const auto &[variantId, productId] : variantData)
+  {
+    std::string attrSQL = "SELECT key, value FROM VariantAttributes WHERE variant_id = " + std::to_string(variantId) + ";";
+    auto attributes = executeQuery<std::pair<std::string, std::string>>(attrSQL, [](char **row) {
+        return std::make_pair(std::string(row[0]), std::string(row[1])); // Mapeo: key y value
+    });
+
+    std::map<std::string, std::string> attributesMap;
+    for (const auto &attribute : attributes)
+    {
+      attributesMap[attribute.first] = attribute.second;
+    }
+
+    variants.emplace_back(variantId, productId, attributesMap);
+  }
+
+  return variants;
 }
 
 bool Database::variantUpdate(const Variant &variant)

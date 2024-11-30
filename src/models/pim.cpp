@@ -1,8 +1,8 @@
 #include "pim.h"
 
 // Product CRUD
-bool PIM::productCreate(const ProductNew &product, int categoryId) {
-  return db.productInsert(product, categoryId);
+bool PIM::productCreate(const ProductNew &product, int categoryId, const std::vector<Variant>& variants) {
+  return db.productInsert(product, categoryId, variants);
 }
 
 std::optional<Product> PIM::productGetByName(const std::string &name) {
@@ -17,6 +17,9 @@ std::vector<Product> PIM::productGetByCategory(std::string category) {
   return db.productGetByCategory(category);
 }
 
+std::vector<Product> PIM::productGetByVariant(std::string variant) {
+  return db.productGetByVariant(variant);
+}
 std::vector<Product> PIM::productGetByPriceRange(double firstRange, double lastRange) {
   return db.productGetByPriceRange(firstRange, lastRange);
 }
@@ -73,6 +76,10 @@ std::vector<Variant> PIM::getVariantsByProductId(int productId) {
 
 std::optional<Variant> PIM::getVariantById(int variantId) {
   return db.getVariantById(variantId);
+}
+
+std::vector<Variant> PIM::variantGetAll() {
+  return db.variantGetAll();
 }
 
 bool PIM::addVariant(const Variant &variant) {

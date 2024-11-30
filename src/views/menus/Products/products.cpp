@@ -14,6 +14,7 @@ products::Submenu::Submenu(PIM *pim)
   _setMenuOption<products::GetByName>(products::GetByName(pim));
   _setMenuOption<products::GetById>(products::GetById(pim));
   _setMenuOption<products::GetByCategory>(products::GetByCategory(pim));
+  _setMenuOption<products::GetByVariant>(products::GetByVariant(pim));
   _setMenuOption<products::GetByPriceRange>(products::GetByPriceRange(pim));
   _setMenuOption<products::Create>(products::Create(pim));
   _setMenuOption<products::Update>(products::Update(pim));
@@ -184,6 +185,56 @@ void products::GetByCategory::execute()
     }
 }
 
+products::GetByVariant::GetByVariant(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Buscar por variante");
+}
+
+void products::GetByVariant::execute()
+{
+    // Solicitar la clave de la variante al usuario
+    auto variantKeyInput = _GetUserInput<std::string, std::string>()
+        .withPrompt("Ingrese el nombre de la variante (ejemplo: Color, Talla): ")
+        .withValidator([](const std::string &value) {
+            return std::make_pair(!value.empty(), "El nombre de la variante no puede estar vacío.");
+        })
+        .withExceptionHandler([](const std::exception &e) {
+            std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n";
+        })
+        .withParseFailureMessage("El formato del nombre no es válido.")
+        .withExitHandler([]() {
+            std::cout << "Operación cancelada.\n";
+        })
+        .withMapper([](const std::string &input) {
+            return input;
+        })
+        .execute();
+
+    if (!variantKeyInput)
+    {
+        return;
+    }
+    auto variantKey = variantKeyInput.value();
+
+    auto productsList = _pim->productGetByVariant(variantKey);
+
+    if (productsList.empty())
+    {
+        std::cout << "No hay productos asociados con la variante \"" << variantKey << "\".\n";
+        return;
+    }
+
+    std::cout << "Lista de productos asociados con la variante \"" << variantKey << "\":\n";
+    for (const auto &product : productsList)
+    {
+        std::cout << "Id: " << product.getId() << "\n"
+                  << "Nombre: " << product.getName() << "\n"
+                  << "Descripción: " << product.getDescription() << "\n"
+                  << "Precio: $" << product.getPrice() << "\n\n";
+    }
+}
+
 products::GetByPriceRange::GetByPriceRange(PIM *pim)
 {
     _setPIM(pim);
@@ -254,95 +305,148 @@ products::Create::Create(PIM *pim)
 
 void products::Create::execute()
 {
-  auto nameInput = _GetUserInput<std::string, std::string>()
-    .withPrompt("Ingrese el nombre del producto: ")
-    .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "El nombre del producto no puede estar vacio."); })
-    .withExceptionHandler([](const std::exception &e){ std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n"; })
-    .withParseFailureMessage("El formato del nombre no es valido.")
-    .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
-    .withMapper([](const std::string &input) { return input; })
-    .execute();
+    auto nameInput = _GetUserInput<std::string, std::string>()
+        .withPrompt("Ingrese el nombre del producto: ")
+        .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "El nombre del producto no puede estar vacio."); })
+        .withExceptionHandler([](const std::exception &e){ std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n"; })
+        .withParseFailureMessage("El formato del nombre no es valido.")
+        .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
+        .withMapper([](const std::string &input) { return input; })
+        .execute();
 
-  if (!nameInput)
-  {
-    return;
-  }
-  auto name = nameInput.value();
+    if (!nameInput)
+    {
+        return;
+    }
+    auto name = nameInput.value();
 
-  auto descriptionInput = _GetUserInput<std::string, std::string>()
-    .withPrompt("Ingrese la descripcion del producto: ")
-    .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "La descripcion del producto no puede estar vacia."); })
-    .withExceptionHandler([](const std::exception &e) { std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n"; })
-    .withParseFailureMessage("El formato de la descripcion no es valido.")
-    .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
-    .withMapper([](const std::string &input) { return input; })
-    .execute();
+    auto descriptionInput = _GetUserInput<std::string, std::string>()
+        .withPrompt("Ingrese la descripcion del producto: ")
+        .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "La descripcion del producto no puede estar vacia."); })
+        .withExceptionHandler([](const std::exception &e) { std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n"; })
+        .withParseFailureMessage("El formato de la descripcion no es valido.")
+        .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
+        .withMapper([](const std::string &input) { return input; })
+        .execute();
 
-  if (!descriptionInput)
-  {
-    return;
-  }
-  auto description = descriptionInput.value();
+    if (!descriptionInput)
+    {
+        return;
+    }
+    auto description = descriptionInput.value();
 
-  auto priceInput = _GetUserInput<double, double>()
-    .withPrompt("Ingrese el precio del producto: ")
-    .withValidator([](const double &value) { return std::make_pair(value > 0, "El precio debe ser mayor que cero."); })
-    .withExceptionHandler([](const std::exception &e) { std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero valido.\n"; })
-    .withParseFailureMessage("El precio debe ser un numero valido.")
-    .withParseFailureHandler([]() { std::cout << "Por favor ingrese un numero (ejemplo: 99.99)\n"; })
-    .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
-    .withMapper([](const double &input) { return input; })
-    .execute();
+    auto priceInput = _GetUserInput<double, double>()
+        .withPrompt("Ingrese el precio del producto: ")
+        .withValidator([](const double &value) { return std::make_pair(value > 0, "El precio debe ser mayor que cero."); })
+        .withExceptionHandler([](const std::exception &e) { std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero valido.\n"; })
+        .withParseFailureMessage("El precio debe ser un numero valido.")
+        .withParseFailureHandler([]() { std::cout << "Por favor ingrese un numero (ejemplo: 99.99)\n"; })
+        .withExitHandler([]() { std::cout << "Operacion cancelada.\n"; })
+        .withMapper([](const double &input) { return input; })
+        .execute();
 
-  if (!priceInput)
-  {
-    return;
-  }
-  double price = static_cast<double>(priceInput.value());
+    if (!priceInput)
+    {
+        return;
+    }
+    double price = static_cast<double>(priceInput.value());
 
-  //Mostrar categorias disponibles al usuario
-  auto categoriesList = _pim->categoryGetAll();
+    auto categoriesList = _pim->categoryGetAll();
 
-  if(categoriesList.empty()) {
-      std::cout << "No hay categorias\n";
-      return;
-  }
+    if(categoriesList.empty()) {
+        std::cout << "No hay categorias\n";
+        return;
+    }
 
-  std::cout << "Seleccione una categoria para el producto:\n";
-  int counter = 1;
-  for (const auto &category : categoriesList) {
-      std::cout << counter++ << ". " << category.getName() << "\n";
-  }
+    std::cout << "Seleccione una categoria para el producto:\n";
+    int counter = 1;
+    for (const auto &category : categoriesList) {
+        std::cout << counter++ << ". " << category.getName() << "\n";
+    }
 
-  auto categoryInput = _GetUserInput<int, int>()
-      .withPrompt("Seleccione una categoria para el producto: ")
-      .withValidator([&](const int &value) {
-          return std::make_pair(value > 0 && value <= categoriesList.size(), "Seleccione una categoria válida.");
-      })
-      .withExceptionHandler([](const std::exception &e) {
-          std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero válido.\n";
-      })
-      .withParseFailureMessage("El id debe ser un número válido.")
-      .withParseFailureHandler([]() {
-          std::cout << "Por favor ingrese un número (ejemplo: 1)\n";
-      })
-      .withExitHandler([]() {
-          std::cout << "Operación cancelada.\n";
-      })
-      .withMapper([&](const int &input) { return input; })
-      .execute();
+    auto categoryInput = _GetUserInput<int, int>()
+        .withPrompt("Seleccione una categoria para el producto: ")
+        .withValidator([&](const int &value) {
+            return std::make_pair(value > 0 && value <= categoriesList.size(), "Seleccione una categoria valida.");
+        })
+        .withExceptionHandler([](const std::exception &e) {
+            std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero valido.\n";
+        })
+        .withParseFailureMessage("El id debe ser un numero valido.")
+        .withParseFailureHandler([]() {
+            std::cout << "Por favor ingrese un numero (ejemplo: 1)\n";
+        })
+        .withExitHandler([]() {
+            std::cout << "Operacion cancelada.\n";
+        })
+        .withMapper([&](const int &input) { return input; })
+        .execute();
 
-  if (!categoryInput)
-  {
-      std::cout << "Operación cancelada.\n";
-      return;
-  }
+    if (!categoryInput)
+    {
+        std::cout << "Operacion cancelada.\n";
+        return;
+    }
 
-  int selectedCategoryIndex = categoryInput.value() - 1;
-  const Category& selectedCategory = categoriesList[selectedCategoryIndex];
+    int selectedCategoryIndex = categoryInput.value() - 1;
+    const Category& selectedCategory = categoriesList[selectedCategoryIndex];
 
-  const ProductNew product(name, description, price);
-  _pim->productCreate(product, selectedCategory.getId());
+    std::vector<Variant> variants;
+
+    while (true) {
+        std::cout << "Agregar una variante al producto:\n";
+
+        auto keyInput = _GetUserInput<std::string, std::string>()
+            .withPrompt("Ingrese el nombre del atributo (ejemplo: Color, Talla): ")
+            .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "El atributo no puede estar vacio."); })
+            .withExceptionHandler([](const std::exception &e) {
+                std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n";
+            })
+            .withParseFailureMessage("El nombre del atributo no es valido.")
+            .withExitHandler([]() {
+                std::cout << "Operacion cancelada para esta variante.\n";
+            })
+            .withMapper([&](const std::string &input) { return input; })
+            .execute();
+
+        if (!keyInput) {
+            std::cout << "Operacion cancelada.\n";
+            break;
+        }
+
+        auto valueInput = _GetUserInput<std::string, std::string>()
+            .withPrompt("Ingrese el valor para '" + keyInput.value() + "': ")
+            .withValidator([](const std::string &value) { return std::make_pair(!value.empty(), "El valor no puede estar vacio."); })
+            .withExceptionHandler([](const std::exception &e) {
+                std::cout << "Error: " << e.what() << "\nPor favor, intente nuevamente.\n";
+            })
+            .withParseFailureMessage("El valor ingresado no es valido.")
+            .withExitHandler([]() {
+                std::cout << "Operacion cancelada para este atributo.\n";
+            })
+            .withMapper([&](const std::string &input) { return input; })
+            .execute();
+
+        if (!valueInput) {
+            std::cout << "Operacion cancelada.\n";
+            break;
+        }
+
+        variants.emplace_back(0, 0, std::map<std::string, std::string>{{keyInput.value(), valueInput.value()}});
+        std::cout << "Variante agregada: " << keyInput.value() << " = " << valueInput.value() << "\n";
+
+        std::cout << "Desea agregar otra variante? (si/no): ";
+        std::string addMore;
+        std::cin >> addMore;
+        if (addMore != "si") {
+            break;
+        }
+    }
+
+    const ProductNew product(name, description, price);
+    _pim->productCreate(product, selectedCategory.getId(), variants);
+
+    std::cout << "Producto creado exitosamente con sus variantes.\n";
 }
 
 products::Update::Update(PIM *pim)
