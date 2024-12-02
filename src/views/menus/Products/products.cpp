@@ -18,6 +18,7 @@ products::Submenu::Submenu(PIM *pim)
   _setMenuOption<products::GetByPriceRange>(products::GetByPriceRange(pim));
   _setMenuOption<products::Create>(products::Create(pim));
   _setMenuOption<products::Update>(products::Update(pim));
+  _setMenuOption<products::Delete>(products::Delete(pim));
 }
 
 products::GetAll::GetAll(PIM *pim)
@@ -530,5 +531,62 @@ void products::Update::execute()
                updatedProduct.description, "\n  Precio: $", updatedProduct.price, "\n");
     } else {
         _print("\nNo se realizaron cambios al producto.\n");
+    }
+}
+
+products::Delete::Delete(PIM *pim)
+{
+    _setPIM(pim);
+    _setDictionaryDescription("Eliminar Producto");
+}
+
+void products::Delete::execute()
+{
+    auto productIdInput = _GetUserInput<int, int>()
+      .withPrompt("Ingrese el id (SKU) del producto: ")
+      .withExceptionHandler([](const std::exception &e) {
+          std::cout << "Error: " << e.what() << "\nPor favor, ingrese un numero válido.\n";
+      })
+      .withParseFailureMessage("El id debe ser un número válido.")
+      .withParseFailureHandler([]() {
+          std::cout << "Por favor ingrese un número (ejemplo: 1)\n";
+      })
+      .withExitHandler([]() {
+          std::cout << "Operación cancelada.\n";
+      })
+      .withMapper([&](const int &input) { return input; })
+      .execute();
+
+    if (!productIdInput)
+    {
+        return;
+    }
+    auto productId = productIdInput.value();
+    auto productOpt = _pim->productGetById(productId);
+
+    if (productOpt) {
+        const Product& product = productOpt.value();
+        auto productCategory = _pim->categoryGetByProductId(int(product.getId()));
+
+        std::cout << "Id: " << product.getId() << "\n"
+                  << "Nombre: " << product.getName() << "\n"
+                  << "Descripcion: " << product.getDescription() << "\n"
+                  << "Precio: $" << product.getPrice() << "\n";
+
+        if (productCategory) {
+            std::cout << "Categoria: " << productCategory->getName() << "\n\n";
+        } else {
+            std::cout << "Categoria: No tiene categoria asignada\n\n";
+        }
+
+        try {
+            if (auto productDelete = _pim->productDelete(productId)) {
+                std::cout << "Producto eliminado exitosamente.\n";
+            }
+        } catch (const std::exception &e) {
+            std::cout << "Error al eliminar el producto.\n";
+        }
+    } else {
+        std::cout << "No se encontró el producto.\n";
     }
 }
